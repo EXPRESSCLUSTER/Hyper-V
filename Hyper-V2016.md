@@ -30,3 +30,14 @@
 ## Create a Base Cluster
 ## Create a Virtual Machine on the Mirror Disk
 ## Add Script Resource to Control the Virtual Machine
+
+start.ps1
+
+    Import-VM -Path $env:VMCX2 -Confirm:$False
+    Start-VM -Name $env:VM -Confirm:$False
+
+stop.ps1
+
+    Stop-VM -Name $env:VM -Force
+    robocopy $env:SourcePath $env:DestPath /MIR
+    Remove-VM -Name $env:VM -Force
