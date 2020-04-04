@@ -77,21 +77,21 @@ By applying this solution for your cluster, the resolution is executed automatic
 	- FailoverThreshold -> Set Number: 0
 	- Final Action: No operation (activate next resource)
 1. Apply the configuration.
-1. Store [Remove-VMSavedState.ps1](https://github.com/EXPRESSCLUSTER/Hyper-V/blob/master/vmResourceRobustness/scripts/Remove_VMSavesState.ps1) under scripts folder:
-	C:\Program Files\EXPRESSCLUSTER\scripts\<failover-group name>\<script resource name>\Remove-VMSavedState.ps1
+1. Store [Remove-VMSavedState.ps1](https://github.com/EXPRESSCLUSTER/Hyper-V/blob/master/vmResourceRobustness/scripts/Remove_VMSavesState.ps1) under scripts folder:  
+   "C:\Program Files\EXPRESSCLUSTER\scripts\\\<failover-group name>\\\<script resource name>\Remove-VMSavedState.ps1"
 1. Edit the script resource which is added in step 1.
 	- Details tab -> Add button -> Browse button -> Select  
-		"C:\Program Files\EXPRESSCLUSTER\scripts\<failover-group name>\<script resource name>\Remove-VMSavedState.ps1"
+	  "C:\Program Files\EXPRESSCLUSTER\scripts\\\<failover-group name\>\\\<script resource name>\Remove-VMSavedState.ps1"
 	- Details tab -> Select start.bat -> Edit button -> Edit the bat file to call:
-		```bat
-    rem ***************************************
-    rem *              start.bat              *
-    rem ***************************************
-
-    cd %CLP_SCRIPT_PATH%
-    PowerShell .\Remove-VMSavedState.ps1
-    exit 0
-		```
+	  ```bat
+	  rem ***************************************
+	  rem *              start.bat              *
+	  rem ***************************************
+	  
+	  cd %CLP_SCRIPT_PATH%
+	  PowerShell .\Remove-VMSavedState.ps1
+	  exit 0
+	  ```
 1. Edit existing vm resource:
 	- Dependency tab -> Uncheck "Follow the default dependency"
 	- Dependency tab -> Select script resource which is added in step1 -> Add button
