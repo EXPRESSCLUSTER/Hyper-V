@@ -106,8 +106,8 @@ Oen EC WebUI
 
 ## Test and confirmation
 
-|No.| Test item | Confirmation |
-|:--|||
+|No.| Test item                       | Confirmation |
+|---|---                              |---           |
 | 1 | start the failover group on PM1 | PM1 started VM1 |
 | 2 | move the failover group to PM2  | PM1 stopped VM1, then PM2 started VM1 |
-| 3 | power off PM2 | PM1 noticed heart beat timeout, then startd VM1 |
+| 3 | power off PM2                   | PM1 noticed heart beat timeout, then startd VM1 |
