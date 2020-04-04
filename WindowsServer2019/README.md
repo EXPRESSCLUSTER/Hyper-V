@@ -1,32 +1,113 @@
-# Host OS Cluster with Windows Server 2016 Hyper-V and EXPRESSCLUSTER
-## Overview
-- Create a Mirror Disk Resource of EXPRESSCLUSTER.
-- Create a virtual machine on the mirror disk to replicate the virtual machine image between the cluster nodes.
-- Add script files to control the virtual machine.
-## Evaluation Environment
+# Hyper-V host clustering by EXPRESSCLUSTER
+
+This document descrives step by step procedure for setting up a HA cluster of Hyper-V hosts.  
+The method also enables replication of **VM** (virtual machine) between **PM** (physical machine).  
+The minimum requirement is two PMs only and no shared storage is required.
+
+
+## System diagram
 ```
-  +----------------------------------------------------------+
-  | ws2019-01                                                |
-  | - Windows Server 2019          +-----------------------+ |
-  |   Hyper-V                      | ws2019-03             | |
-  | - EXPRESSCLUSTER X 4.0 (12.01) | - Windows Server 2019 | |
-  |                                +-----------------------+ |
-  |                                   |                      |
-  +-----------------------------------|----------------------+ 
-                                      |
-                                      | Mirroring
-                                      |
-  +-----------------------------------|----------------------+
-  | ws2019-02                         |                      |
-  | - Windows Server 2019          +.......................+ |
-  |   Hyper-V                      : ws2016-03             : |
-  | - EXPRESSCLUSTER X 4.0 (12.01) : - Windows Server 2019 : |
-  |                                +.......................+ |
-  |                                                          |
-  +----------------------------------------------------------+ 
+     +----------------------------------------------------------+
+     | PM1                                                      |
+     | - Windows Server 2019          +-----------------------+ |
+     |   Hyper-V                      | VM1                   | |
+     | - EXPRESSCLUSTER X 4.1 (12.11) | - Windows Server 2019 | |
+ +---+                                +-----------------------+ |
+ |   |                                   |                      |
+ |   +-----------------------------------|----------------------+ 
+ |                                       |
+ | Heartbeat                             | Mirroring
+ |                                       |
+ |   +-----------------------------------|----------------------+
+ |   | PM2                               |                      |
+ |   | - Windows Server 2019          +.......................+ |
+ |   |   Hyper-V                      : VM1                   : |
+ |   | - EXPRESSCLUSTER X 4.1 (12.11) : - Windows Server 2019 : |
+ +---+                                +.......................+ |
+     |                                                          |
+     +----------------------------------------------------------+ 
 ```
-## Install Hyper-V
-## Install EXPRESSCLUSTER
-## Create a Base Cluster
-## Create a Virtual Machine on the Mirror Disk
-## Add Script Resource to Control the Virtual Machine
+
+## Overall steps
+1. Prepare 2 PMs where Windows, Hyper-V, EXPRESSCLUSTER installed.
+2. Configure a Cluster, Failover group and MD (Mirror Disk) resource.
+3. Create a VM (Virtual Machine) on the MD
+4. Configure Script Resource to control the VM
+5. Configure Monitor Resource to monitor the VM
+
+Will describeing step 3 and later.
+
+## Steps
+
+Assumption:
+- The drive letter for data partition of MD resource as *X: drive*
+- Start the failover group on PM1 to allow access to MD resource 
+
+On PM1
+  1. open Hyper-V Manager
+  2. right click Hyper-V host PM1 > [New] > [Virtual Machine]
+  3. enter e.x. [VM1] as [Name] > specify the location under MD resource [x:\\Hyper-V\\VM Configs] > [Next]
+  4. specify whichever generation > [Next]
+  5. assign Memory > [Next]
+  6. configure networking > [Next]
+  7. select [Create a virtual hard disk]> specify [x:\\Hyper-V\\VM Configs] as [Location] > specify [Name] and [Size] on requisit > [Next]
+  8. specify Installation Options on requisit > [Next]
+  9. [Finish]
+  10. open EC WebUI > move the failover group to PM2
+
+On PM2
+  1. opne Hyper-V Manager
+  2. right click Hyper-V host PM2 > [Import Virtual Machine]
+  3. specify [x:\\Hyper-V\\VM Configs\\VM1] as [Folder] Locate Folder > [Next]
+  4. select [**Register the virtual machine in-place (use the existing unique ID)**] > [Next]
+  5. [Finish]
+
+Oen EC WebUI
+  1. stop the failover group
+  2. change to [Configu mode]
+  3. add [Script resource] to the failover group > edit [start.bat]
+
+        ```
+        rem **********
+        rem Parameter : the name of the VM to be controlled in the Hyper-V manager
+        set VMNAME=vm1
+        rem **********
+        IF "%CLP_EVENT%" == "RECOVER" GOTO EXIT
+
+        powershell -Command "Start-VM -Name %VMNAME% -Confirm:$false"
+
+        :EXIT
+       ```
+
+  4. edit [stop.bat]
+
+        ```
+        rem **********
+        rem Parameter : the name of the VM to be controlled in the Hyper-V manager
+        set VMNAME=vm1
+        rem **********
+
+        powershell -Command "Stop-VM -Name %VMNAME% -Force"
+       ```
+
+  5. add [Custom Monitor resource]
+
+        use 
+        [genw.bat](../WindowsServer2016/script/genw.bat) ,
+        [vmstate.ps1](../WindowsServer2016/script/vmstate.ps1) ,
+        [SetEnvironment.bat](../WindowsServer2016/script/SetEnvironment.bat)
+        same like on Windows Server 2016.  **[To Be Enhanced]**
+
+
+  6. apply the configuration
+
+## Restriction
+- VMs stored in the same MD resource need to move/failover together. It's good to control such VMs in the same failover group.
+
+## Test and confirmation
+
+|No.| Test item | Confirmation |
+|:--|||
+| 1 | start the failover group on PM1 | PM1 started VM1 |
+| 2 | move the failover group to PM2  | PM1 stopped VM1, then PM2 started VM1 |
+| 3 | power off PM2 | PM1 noticed heart beat timeout, then startd VM1 |
