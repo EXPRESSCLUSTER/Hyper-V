@@ -4,7 +4,6 @@ This document descrives step by step procedure for setting up a HA cluster of Hy
 The method also enables replication of **VM** (virtual machine) between **PM** (physical machine).  
 The minimum requirement is two PMs only and no shared storage is required.
 
-
 ## System diagram
 ```
      +----------------------------------------------------------+
@@ -30,8 +29,8 @@ The minimum requirement is two PMs only and no shared storage is required.
 
 ## Overall steps
 1. Prepare 2 PMs where Windows, Hyper-V, EXPRESSCLUSTER installed.
-2. Configure a Cluster, Failover group and MD (Mirror Disk) resource.
-3. Create a VM (Virtual Machine) on the MD
+2. Configure a Cluster, Failover group and **MD** (Mirror Disk) resource.
+3. Create a VM on the MD
 4. Configure Script Resource to control the VM
 5. Configure Monitor Resource to monitor the VM
 
@@ -40,8 +39,8 @@ Will describeing step 3 and later.
 ## Steps
 
 Assumption:
-- The drive letter for data partition of MD resource as *X: drive*
-- Start the failover group on PM1 to allow access to MD resource 
+- The drive letter for data partition of MD resource is *X: drive*
+- The failover group is online on PM1 to allow access to MD resource
 
 On PM1
   1. open Hyper-V Manager
@@ -62,7 +61,7 @@ On PM2
   4. select [**Register the virtual machine in-place (use the existing unique ID)**] > [Next]
   5. [Finish]
 
-Oen EC WebUI
+Open EC WebUI
   1. stop the failover group
   2. change to [Configu mode]
   3. add [Script resource] to the failover group > edit [start.bat]
@@ -98,11 +97,10 @@ Oen EC WebUI
         [SetEnvironment.bat](../WindowsServer2016/script/SetEnvironment.bat)
         same like on Windows Server 2016.  **[To Be Enhanced]**
 
-
   6. apply the configuration
 
 ## Restriction
-- VMs stored in the same MD resource need to move/failover together. It's good to control such VMs in the same failover group.
+VMs stored in the same MD resource need to move/failover together. It's good to control such VMs in the same failover group.
 
 ## Test and confirmation
 
