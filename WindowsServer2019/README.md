@@ -41,6 +41,7 @@ Will describeing step 3 and later.
 Assumption:
 - The drive letter for data partition of MD resource is *X: drive*
 - The failover group is online on PM1 to allow access to MD resource
+- The *Hyper-V Integration Services* is installed on to VM to be controlled. 
 
 On PM1
   1. open Hyper-V Manager
@@ -63,8 +64,13 @@ On PM2
 
 Open EC WebUI
   1. stop the failover group
-  2. change to [Configu mode]
-  3. add [Script resource] to the failover group > edit [start.bat]
+  2. change to [Config mode]
+
+  **NOTE** : The following assumes the name of the VM as *vm1*
+
+  3. add [Script resource] to the failover group >  
+
+     edit [start.bat]
 
         ```
         rem **********
@@ -78,7 +84,7 @@ Open EC WebUI
         :EXIT
        ```
 
-  4. edit [stop.bat]
+     edit [stop.bat]
 
         ```
         rem **********
@@ -89,15 +95,28 @@ Open EC WebUI
         powershell -Command "Stop-VM -Name %VMNAME% -Force"
        ```
 
-  5. add [Custom Monitor resource]
+  4. add [Custom Monitor resource]
 
+        edit [genw.bat]
+
+        ```
+        rem **********
+        rem Parameter : the name of the VM to be controlled in the Hyper-V manager
+        set VMNAME=vm1
+        rem **********
+
+        powershell -Command "if ((Get-VMIntegrationService -VMName %VMNAME% -Name Heartbeat).PrimaryOperationalStatus -ne \"OK\") {exit 1}"
+        exit %ERRORLEVEL%
+       ```
+<!--
         use 
         [genw.bat](../WindowsServer2016/script/genw.bat) ,
         [vmstate.ps1](../WindowsServer2016/script/vmstate.ps1) ,
         [SetEnvironment.bat](../WindowsServer2016/script/SetEnvironment.bat)
         same like on Windows Server 2016.  **[To Be Enhanced]**
+-->
 
-  6. apply the configuration
+  5. apply the configuration
 
 ## Restriction
 VMs stored in the same MD resource need to move/failover together. It's good to control such VMs in the same failover group.
