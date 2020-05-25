@@ -56,7 +56,7 @@ On PM1
   10. open EC WebUI > move the failover group to PM2
 
 On PM2
-  1. opne Hyper-V Manager
+  1. open Hyper-V Manager
   2. right click Hyper-V host PM2 > [Import Virtual Machine]
   3. specify [x:\\Hyper-V\\VM Configs\\VM1] as [Folder] Locate Folder > [Next]
   4. select [**Register the virtual machine in-place (use the existing unique ID)**] > [Next]
@@ -108,13 +108,6 @@ Open EC WebUI
         powershell -Command "if ((Get-VMIntegrationService -VMName %VMNAME% -Name Heartbeat).PrimaryOperationalStatus -ne \"OK\") {exit 1}"
         exit %ERRORLEVEL%
        ```
-<!--
-        use 
-        [genw.bat](../WindowsServer2016/script/genw.bat) ,
-        [vmstate.ps1](../WindowsServer2016/script/vmstate.ps1) ,
-        [SetEnvironment.bat](../WindowsServer2016/script/SetEnvironment.bat)
-        same like on Windows Server 2016.  **[To Be Enhanced]**
--->
 
   5. apply the configuration
 
