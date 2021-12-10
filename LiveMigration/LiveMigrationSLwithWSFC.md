@@ -10,13 +10,13 @@ Configuring VM Live Migration in Hyper-V host cluster with WSFC.
 	- WSFC uses the virtual shared disk as Cluster Shared Volume (CSV).
 - ECX protects VMs on Hyper-V, means start / stop / monitor and realizing failover of VMs across Hyper-V boxes.
 
-	![Architecture](Hyper-V-cluster-architecture-WSFC.png)
+	![Architecture](Hyper-V-cluster-architecture-WSFC.PNG)
 
 ## Network
 
 - Separating network for VM / management of VM and cluster / mirroring / iSCSI / Live Migration.
 
-	![Network](Network-WSFC.png)
+	![Network](Network-WSFC.PNG)
 
 ## Setting up 2-node WSFC clutser
 
