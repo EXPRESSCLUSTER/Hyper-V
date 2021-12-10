@@ -16,7 +16,7 @@ Configuring VM Live Migration in Hyper-V host cluster with WSFC.
 
 - Separating network for VM / management of VM and cluster / mirroring / iSCSI / Live Migration.
 
-	\<being edited\>
+	![Network](Network-WSFC.png)
 
 ## Setting up 2-node WSFC clutser
 
