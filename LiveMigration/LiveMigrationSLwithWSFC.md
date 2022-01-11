@@ -140,6 +140,9 @@ At this point, required ECX resources are
 
 	targetcli /iscsi/iqn.1996-10.com.ecx/tpg1/acls create $IQN1
 	targetcli /iscsi/iqn.1996-10.com.ecx/tpg1/acls create $IQN2
+
+	# Save the configuration
+	targetcli saveconfig
 	```
 
 	You can check IQN on **iSCSI Initiator** Configuration tab on each host server.
