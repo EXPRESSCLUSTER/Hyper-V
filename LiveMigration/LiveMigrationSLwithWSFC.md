@@ -15,6 +15,7 @@ Configuring VM Live Migration in Hyper-V host cluster with WSFC.
 ## Network
 
 - Separating network for VM / management of VM and cluster / mirroring / iSCSI / Live Migration.
+- One server is needed outside a WSFC cluster, for ECX witness and WSFC quorum disk. Ideally this server should also be clustered, but currently this document describes a configuration with two WSFC servers and one quorum disk.
 
 	![Network](Network-WSFC.PNG)
 
@@ -98,6 +99,9 @@ Once OS installation finished, do as follows.
 1. Create a ECX cluster
 
 At this point, required ECX resources are
+- Witness heartbeat
+- LAN heartbeat
+- HTTP NP
 - Floating IP address
 	- Should belong to the network connecting to iSCSI_switch
 - Mirror disk
