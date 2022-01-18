@@ -84,7 +84,7 @@ Once OS installation finished, do as follows.
 1. Configure firewalld
 1. Disable SELinux
 1. Network settings
-1. Install iSCSI target, unzip, tar with yum command
+1. Install iSCSI **targetcli**, **unzip**, **tar** and **perl** with yum command
 
 	```
 	# yum -y install targetcli unzip tar
@@ -107,23 +107,25 @@ At this point, required ECX resources are
 - Mirror disk
 	- File system is none
 - Exec
+	- e.g. Resource name is *exec-iscsi*
+	- Should depend on a Floating IP address and Mirror disk
 
-	*start.sh*
-	```
-	#!/bin/sh -eu
-	echo "Starting iSCSI Target"
-	systemctl start target
-	echo "Started  iSCSI Target ($?)"
-	exit 0
-	```
-	*stop.sh*
-	```
-	#!/bin/sh -eu
-	echo "Stopping iSCSI Target"
-	systemctl stop target
-	echo "Stopped  iSCSI Target ($?)"
-	exit 0
-	```
+		*start.sh*
+		```
+		#!/bin/sh -eu
+		echo "Starting iSCSI Target"
+		systemctl start target
+		echo "Started  iSCSI Target ($?)"
+		exit 0
+		```
+		*stop.sh*
+		```
+		#!/bin/sh -eu
+		echo "Stopping iSCSI Target"
+		systemctl stop target
+		echo "Stopped  iSCSI Target ($?)"
+		exit 0
+		```
 
 ### Coniguring iSCSI target
 
@@ -240,4 +242,149 @@ On host servers,
 
 After the above all steps, confirm that EC-VM1 and 2 can connect to both servers by ssh command without typing a password.
 
-### Adding script resources to control VMs and live migration
+### Adding EXEC resources to control a VM and live migration
+
+Two kinds of EXEC resource are needed per VM.
+One is for registering a VM to Hyper-V and another is for controlling a VM.
+
+1. Downloading scripts from GitHub repository
+1. Adding to a EXEC resource to register a VM
+	- e.g. Resource name is *exec-VMNAME-register*
+	- Depends on *exec-iscsi*
+	- Replacing *start.sh* with *vm-start.pl*
+	- Editing **Configuration** section in the start script.
+	- Replacing *stop.sh* with *vm-stop.pl*
+	- Editing **Configuration** section in the stop script.
+	- **Log Output Path** in **Tuning** page is */opt/nec/clusterpro/log/exec-VMNAME-register.log*
+	- Checking *Rotate Log* in **Tuning** page
+1. Adding to a EXEC resource to controll a VM
+	- e.g. Resource name is *exec-VMNAME*
+	- Depends on *exec-VMNAME-register*
+	- Replacing *start.sh* with *vm-register.pl*
+	- Editing **Configuration** section in the start script.
+	- Replacing *stop.sh* with *vm-unregister.pl*
+	- Editing **Configuration** section in the stop script.
+	- **Log Output Path** in **Tuning** page is */opt/nec/clusterpro/log/exec-VMNAME.log*
+	- Checking *Rotate Log* in **Tuning** page
+1. Applying the cluster connfiguration
+
+### Adding custom monitor resource for a VM
+
+Work in progress
+
+## How to operate a cluter
+
+*exec-VMNAME*
+- When it starts, VM is powerd on.
+- When it stops, VM is powerd off.
+
+*exec-VMNAME-register*
+- When it starts, VM is registered, CSV becomes online.
+- When it stops, VM is unregisterd, CSV becomes offline.
+
+Exceptional case:
+- In case that an user moves a failover group manually and a VM is running on a source server, Live Migration is executed without stopping the VM and the CSV.
+
+## Testing
+
+Move a failover group while *exec-VMNAME* is running on a source server.
+- Test items
+	- From ec1 to ec2
+	- From ec2 to ec1
+- Result
+	- Live Migration is executed without stopping a VM and a CSV.
+
+Start a failover group in case that a VM is owned by a server where you will start a failover group.
+- Test items
+	- On ec1
+	- On ec2
+- Result
+	- A CSV and a VM become online.
+
+Start a failover group in case that a CSV is owned by another server.
+- Test items
+	- On ec1
+	- On ec2
+- Result
+	- A CSV and a VM are migrated and become online.
+
+Stop a failover group
+- Test items
+	- On ec1
+	- On ec2
+- Result
+	- A CSV and a VM become offline.
+
+## Powershell commands to check a cluster component status.
+
+WSFC node status
+```
+PS C:\Users\Administrator.2016DOM> Get-ClusterNode
+
+Name          State Type
+----          ----- ----
+ws2019-host-1 Up    Node
+ws2019-host-2 Up    Node
+```
+---
+CSV status
+```
+PS C:\Users\Administrator.2016DOM> Get-ClusterSharedVolume
+
+Name           State  Node
+----           -----  ----
+Cluster Disk 1 Online ws2019-host-2
+```
+---
+Cluster resource status
+```
+Name                                    State  OwnerGroup    ResourceType
+----                                    -----  ----------    ------------
+Cluster Disk 2                          Online Cluster Group Physical Disk
+Cluster IP Address                      Online Cluster Group IP Address
+Cluster Name                            Online Cluster Group Network Name
+Storage Qos Resource                    Online Cluster Group Storage QoS Policy Manager
+Virtual Machine Cent8.2-1               Online Cent8.2-1     Virtual Machine
+Virtual Machine Cluster WMI             Online Cluster Group Virtual Machine Cluster WMI
+Virtual Machine Configuration Cent8.2-1 Online Cent8.2-1     Virtual Machine Configuration
+```
+*exec-VMNAME-register* starts or stops *Virtual Machine Configuration VMNAME*.
+
+While *Virtual Machine Configuration VMNAME* is online, a VM is listed on Hyper-V Manager.
+
+While it is offline, a VM is not visible on Hyper-V Manager.
+
+---
+Cluster group status
+```
+PS C:\Users\Administrator.2016DOM> Get-ClusterGroup
+
+Name              OwnerNode     State
+----              ---------     -----
+Available Storage ws2019-host-2 Offline
+Cent8.2-1         ws2019-host-2 Online
+Cluster Group     ws2019-host-2 Online
+```
+A cluster group *VMNAME* is created automatically when a VM is added to WSFC cluster.
+
+*VMNAME* group is composed of multiple resources, but its state equals to whether a VM is running or not.
+
+---
+Powershell command help
+```
+PS C:\Users\Administrator.2016DOM> Get-Help -Name Get-ClusterNode
+
+NAME
+    Get-ClusterNode
+
+SYNTAX
+    Get-ClusterNode [[-Name] <StringCollection>] [-InputObject <psobject>] [-Cluster <string>]  [<CommonParameters>]
+.
+.
+```
+---
+Powershell command list
+```
+PS C:\Users\Administrator.2016DOM> Get-Command -Module FailoverClusters | Out-GridView
+PS C:\Users\Administrator.2016DOM> Get-Command -Module Hyper-V | Out-GridView
+```
