@@ -72,6 +72,10 @@ Once created a cluster, in **Networks** setting, disable networks other than Man
 
 Open **Hyper-V Manager** and create a new VM.
 
+After creating EC-VMs, change the VM settings as follows:
+- **Automatic Start Action**: **Always start this virtual machine automatically**
+- **Startup delay**: 5 seconds
+
 #### EC-VM's spec
 - CentOS Linux release 8.2.2004 (Core)
 - EXPRESSCLUSTER X 4.3.0-1
@@ -175,13 +179,16 @@ This disk will be configured as WSFC cluster shared volume from next steps.
 
 A shared disk that is accessible from both hosts is needed outside host servers.
 
+A quorum disk size should be larger than 512MB.
+- https://docs.microsoft.com/en-us/windows-server/failover-clustering/manage-cluster-quorum
+
 You can colocate it with ECX witness server and configure it as iSCSI target.
 
 1. Open **Disk Management** on either host server
 1. Configure the disk as NTFS
 1. Open **Disk Management** on another host server, and make it online.
 1. Open **Failover Cluster Manager**
-1. In **Disks** page, add the disk and set it as cluster shared volume.
+1. In **Disks** page, add the disk.
 1. In cluster summary page, select **Configure Cluster Quorum Settings** in **More Actions**
 1. **Select the quorum witness**
 1. **Configure a disk witness**
@@ -200,6 +207,38 @@ In case you import an existing VM,
 
 - In **Networks** page, select **Live Migration Settings**
 - Uncheck networks other than VM_network
+
+### Configuring WSFC settings to restrain WSFC recovery action
+
+To prevent conflicts between recovery actions, WSFC recovery action needs to be disabled.
+
+Checking a current quarantine configuration:
+```
+> get-cluster | Select Name,Resiliency*,Quarantine*
+
+Name                    : ws2019-lm-cluster
+ResiliencyDefaultPeriod : 240
+ResiliencyLevel         : AlwaysIsolate
+QuarantineDuration      : 7200
+QuarantineThreshold     : 3
+```
+
+Changing a quarantine configuration:
+```
+> (Get-Cluster).ResiliencyDefaultPeriod = 9999
+> (Get-Cluster).QuarantineThreshold = 9999
+```
+
+WSFC behavior after executing the above command:
+- After WSFC detects another cluster node is isolated, WSFC wait 9999 seconds until it starts recovery action.
+- WSFC quarantines a cluster node that has be turned off unintentionally 9999 times in a hour.
+
+Disabling a VM failover function:
+1. Open VM property on **Failover Cluster Manager**.
+1. In **Failover** tab, change settings as follows.
+	- **Maximum failures in the specified period**: 0
+	- **Period (hours)**: 0
+	- **Prevent failback**
 
 ### Configuring ssh settings
 
@@ -221,11 +260,15 @@ On EC-VMs,
 1. Copy the public key to host servers
 
 	```
-	# scp /root/.ssh/id_rsa.pub Administrator@<IP of host 1>:C:\\ProgramData/ssh/administrators_authorized_keys
-	# scp /root/.ssh/id_rsa.pub Administrator@<IP of host 2>:C:\\ProgramData/ssh/administrators_authorized_keys
+	# scp /root/.ssh/id_rsa.pub Administrator@<IP of host 1>:C:\\ProgramData/ssh/<EC-VM hostname>
+	# scp /root/.ssh/id_rsa.pub Administrator@<IP of host 2>:C:\\ProgramData/ssh/<EC-VM hostname>
 	```
 
 On host servers,
+1. Merge EC-VM's key files into **administrators_authorized_keys**.
+	```
+	> type C:\ProgramData\ssh\ec-vm1 C:\ProgramData\ssh\ec-vm2 > administrator_authorized_keys
+	```
 1. Add following lines to **sshd_config** in *C:\ProgramData\ssh*
 	```
 	PubkeyAuthentication yes
@@ -248,19 +291,10 @@ Two kinds of EXEC resource are needed per VM.
 One is for registering a VM to Hyper-V and another is for controlling a VM.
 
 1. Downloading scripts from GitHub repository
-1. Adding to a EXEC resource to register a VM
-	- e.g. Resource name is *exec-VMNAME-register*
-	- Depends on *exec-iscsi*
-	- Replacing *start.sh* with *vm-start.pl*
-	- Editing **Configuration** section in the start script.
-	- Replacing *stop.sh* with *vm-stop.pl*
-	- Editing **Configuration** section in the stop script.
-	- **Log Output Path** in **Tuning** page is */opt/nec/clusterpro/log/exec-VMNAME-register.log*
-	- Checking *Rotate Log* in **Tuning** page
 1. Adding to a EXEC resource to controll a VM
 	- e.g. Resource name is *exec-VMNAME*
-	- Depends on *exec-VMNAME-register*
-	- Replacing *start.sh* with *vm-register.pl*
+	- Depends on *exec-iscsi*
+	- Replacing *start.sh* with *vm-start.pl*
 	- Editing **Configuration** section in the start script.
 	- Replacing *stop.sh* with *vm-unregister.pl*
 	- Editing **Configuration** section in the stop script.
@@ -275,116 +309,16 @@ Work in progress
 ## How to operate a cluter
 
 *exec-VMNAME*
-- When it starts, VM is powerd on.
-- When it stops, VM is powerd off.
+- When it starts, VM is registered on Hyper-V Manager and powered on.
+- When it stops, VM is unregistered on Hyper-V Manager and powerd off.
 
-*exec-VMNAME-register*
-- When it starts, VM is registered, CSV becomes online.
-- When it stops, VM is unregisterd, CSV becomes offline.
+How to execute Live Migration:
+- In case that an user moves a failover group manually and a VM is running on a source server, Live Migration is executed without stopping the VM.
 
-Exceptional case:
-- In case that an user moves a failover group manually and a VM is running on a source server, Live Migration is executed without stopping the VM and the CSV.
+How to stop the VM to change its property:
+- Suspend *genw-VMNAME*.
+- Please note that VM should be powered on after changing its property and before resuming *genw-VMNAME*.
 
 ## Testing
 
-Move a failover group while *exec-VMNAME* is running on a source server.
-- Test items
-	- From ec1 to ec2
-	- From ec2 to ec1
-- Result
-	- Live Migration is executed without stopping a VM and a CSV.
-
-Start a failover group in case that a VM is owned by a server where you will start a failover group.
-- Test items
-	- On ec1
-	- On ec2
-- Result
-	- A CSV and a VM become online.
-
-Start a failover group in case that a CSV is owned by another server.
-- Test items
-	- On ec1
-	- On ec2
-- Result
-	- A CSV and a VM are migrated and become online.
-
-Stop a failover group
-- Test items
-	- On ec1
-	- On ec2
-- Result
-	- A CSV and a VM become offline.
-
-## Powershell commands to check a cluster component status.
-
-WSFC node status
-```
-PS C:\Users\Administrator.2016DOM> Get-ClusterNode
-
-Name          State Type
-----          ----- ----
-ws2019-host-1 Up    Node
-ws2019-host-2 Up    Node
-```
----
-CSV status
-```
-PS C:\Users\Administrator.2016DOM> Get-ClusterSharedVolume
-
-Name           State  Node
-----           -----  ----
-Cluster Disk 1 Online ws2019-host-2
-```
----
-Cluster resource status
-```
-Name                                    State  OwnerGroup    ResourceType
-----                                    -----  ----------    ------------
-Cluster Disk 2                          Online Cluster Group Physical Disk
-Cluster IP Address                      Online Cluster Group IP Address
-Cluster Name                            Online Cluster Group Network Name
-Storage Qos Resource                    Online Cluster Group Storage QoS Policy Manager
-Virtual Machine Cent8.2-1               Online Cent8.2-1     Virtual Machine
-Virtual Machine Cluster WMI             Online Cluster Group Virtual Machine Cluster WMI
-Virtual Machine Configuration Cent8.2-1 Online Cent8.2-1     Virtual Machine Configuration
-```
-*exec-VMNAME-register* starts or stops *Virtual Machine Configuration VMNAME*.
-
-While *Virtual Machine Configuration VMNAME* is online, a VM is listed on Hyper-V Manager.
-
-While it is offline, a VM is not visible on Hyper-V Manager.
-
----
-Cluster group status
-```
-PS C:\Users\Administrator.2016DOM> Get-ClusterGroup
-
-Name              OwnerNode     State
-----              ---------     -----
-Available Storage ws2019-host-2 Offline
-Cent8.2-1         ws2019-host-2 Online
-Cluster Group     ws2019-host-2 Online
-```
-A cluster group *VMNAME* is created automatically when a VM is added to WSFC cluster.
-
-*VMNAME* group is composed of multiple resources, but its state equals to whether a VM is running or not.
-
----
-Powershell command help
-```
-PS C:\Users\Administrator.2016DOM> Get-Help -Name Get-ClusterNode
-
-NAME
-    Get-ClusterNode
-
-SYNTAX
-    Get-ClusterNode [[-Name] <StringCollection>] [-InputObject <psobject>] [-Cluster <string>]  [<CommonParameters>]
-.
-.
-```
----
-Powershell command list
-```
-PS C:\Users\Administrator.2016DOM> Get-Command -Module FailoverClusters | Out-GridView
-PS C:\Users\Administrator.2016DOM> Get-Command -Module Hyper-V | Out-GridView
-```
+Please refer to [Test items of Live Migration SL](Testing.md).

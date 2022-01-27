@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# Script for power off the Virtual Machine
+# Script to stop the Virtual Machine
 #
 use strict;
 #--------------------------------------------------------------
@@ -10,6 +10,8 @@ use strict;
 my @vm_names = (
 'Cent8.2-1'
 );
+
+my $csv_name = 'Cluster Disk 1';
 
 # The IP address of Hyper-V host servers
 my $host1_ip = "192.168.137.196";
@@ -23,11 +25,19 @@ my $ec2 = "192.168.137.200";
 my $wsfc_account = "Administrator";
 my $wsfc_domain = "2016dom.local";
 #--------------------------------------------------------------
+# The check interval for VM, VM Configuration, CSV status. (second)
+my $interval = 6;
+# The maximum count to check a status.
+my $max_cnt = 50;
+#--------------------------------------------------------------
 # Global values
 my $vm_name = "";
 my $cmd = "";
 my @lines = ();
 my $ssh_prefix = "ssh -i ~/.ssh/id_rsa -l $wsfc_account\@$wsfc_domain";
+my $csv_state = "";
+my $csv_owner = "";
+my $vm_state = "";
 my $ownhost_ip = "";
 my $opphost_ip = "";
 my $clp_factor = $ENV{CLP_FACTOR};
@@ -64,6 +74,21 @@ foreach (@vm_names){
 		$r = 1;
 		next;
 	}
+
+	if (&WaitVmPowerOff) {
+		$r = 1;
+		next;
+	}
+
+	if (&VmConfigStop) {
+		$r = 1;
+		next;
+	}
+
+	if (&CsvStop()) {
+		$r = 1;
+		next;
+	}
 }
 exit $r;
 #--------------------------------------------------------------
@@ -72,6 +97,45 @@ exit $r;
 sub VmPowerOff {
 	if (&execution("$ssh_prefix $ownhost_ip Powershell \"Set-Variable ProgressPreference SilentlyContinue; Stop-VM $vm_name -Force\"")) {
 		&Log("[E][VmPowerOff] [$vm_name] failed to stop.\n");
+		return 1;
+	}
+	return 0;
+}
+#--------------------------------------------------------------
+sub WaitVmPowerOff {
+	for (my $i = 0; $i < $max_cnt; $i++){
+		&execution("$ssh_prefix $ownhost_ip Powershell Get-ClusterGroup");
+		foreach (@lines) {
+			if (/$vm_name\s+(\S+)\s+(\S+)/) {
+				$vm_state = $2;
+			}
+		}
+
+		if ($vm_state eq "Offline") {
+			return 0;
+		}
+
+		&Log("[I][WaitVmPowerOff] [$vm_name] waiting power off. (cnt=$i)\n");
+		sleep $interval;
+	}
+
+	&Log("[E][WaitVmPowerOff] [$vm_name] powered off not completed. (cnt=$max_cnt)\n");
+	return 1;
+}
+#--------------------------------------------------------------
+sub VmConfigStop {
+	# No error if the resource is already offline on the destination server.
+	if (&execution("$ssh_prefix $ownhost_ip Powershell \"Stop-ClusterResource 'Virtual Machine Configuration $vm_name'\"")) {
+		&Log("[E][VmConfigStop] Configuration [$vm_name] failed to stop.\n");
+		return 1;
+	}
+	return 0;
+}
+#--------------------------------------------------------------
+sub CsvStop {
+	# No error if the csv is already offline on the destination server.
+	if (&execution("$ssh_prefix $ownhost_ip Powershell \"Stop-ClusterResource -Name '$csv_name'\"")) {
+		&Log("[E][CsvStop] CSV failed to stop.\n");
 		return 1;
 	}
 	return 0;
