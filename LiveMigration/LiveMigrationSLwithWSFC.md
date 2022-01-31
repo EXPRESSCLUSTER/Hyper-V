@@ -304,13 +304,43 @@ One is for registering a VM to Hyper-V and another is for controlling a VM.
 
 ### Adding custom monitor resource for a VM
 
-Work in progress
+One custom monitor resource is needed per VM, and one is needed per cluster.
+
+1. Adding to a custom monitor resource to monitor a VM
+	- e.g. Monitor name is *genw-VMNAME*
+	- **Retry Count** is 1
+	- Monitor timing is when *exec-VMNAME* is active
+	- Replacing *genw.sh* with *genw-vm.pl*
+	- Editing **Configuration** section in the monitor script
+	- **Log Output Path** is */opt/nec/clusterpro/log/genw-VMNAME.log*
+	- Checking **Rotate Log**
+	- **Normal Return Value** is 0
+	- **Recovery Action** is **Executing failover to the recovery target**
+	- **Recovery Target** is the failover group that includes the VM
+1. Adding to a custom monitor resource to monitor an opposite EC-VM
+	- e.g. Monitor name is *genw-remote-node*
+	- Monitor timing is when the md resource is active
+	- Replacing *genw.sh* with *genw-remote-node.pl*
+	- Editing **Configuration** section in the monitor script
+	- **Log Output Path** is */opt/nec/clusterpro/log/genw-remote-node.log*
+	- Checking **Rotate Log**
+	- **Normal Return Value** is 0
+	- **Recovery Action** is **Custom settings**
+	- **Recovery Target** is **LocalServer**
+	- **Final Action** is **No operation**
 
 ## How to operate a cluter
 
 *exec-VMNAME*
 - When it starts, VM is registered on Hyper-V Manager and powered on.
 - When it stops, VM is unregistered on Hyper-V Manager and powerd off.
+
+*genw-VMNAME*
+- Executing the recovery action if VM is not running on its host server.
+
+*genw-remote-node*
+- Starting ECX cluster if it is not running on the opposite EC-VM.
+- Powering on the opposite EC-VM if it is not running.
 
 How to execute Live Migration:
 - In case that an user moves a failover group manually and a VM is running on a source server, Live Migration is executed without stopping the VM.

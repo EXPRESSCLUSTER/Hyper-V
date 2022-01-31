@@ -1,29 +1,14 @@
 # Test items of Live Migration SL
 
-## Before testing
+## Notes for WSFC quarantine
 
-WSFC has a quarantine function to isolate a cluster node that has crashed a certain number of times for a certain period. I recommend to disable the quarantine function before testing.
+WSFC has a quarantine function to isolate a cluster node that has crashed a certain number of times for a certain period. If you followed the setup document, the quarantine threshold would have been extended to 9999 times.
 
-Checking a current quarantine configuration:
+Although with this settings, if your server would be quarantined, you can release the quarantined server with the following command.
+
 ```
-> get-cluster | Select Name,Resiliency*,Quarantine*
-
-Name                    : ws2019-lm-cluster
-ResiliencyDefaultPeriod : 240
-ResiliencyLevel         : AlwaysIsolate
-QuarantineDuration      : 7200
-QuarantineThreshold     : 3
+> Start-ClusterNode -ClearQuarantine
 ```
-
-Changing a quarantine configuration:
-```
-> (Get-Cluster).ResiliencyDefaultPeriod = 9999
-> (Get-Cluster).QuarantineThreshold = 9999
-```
-
-WSFC behavior after executing the above command:
-- After WSFC detects another cluster node is isolated, WSFC wait 9999 seconds until it starts VM failover.
-- WSFC quarantines a cluster node that has be turned off unintentionally 9999 times in a hour.
 
 ## Normal operation
 
@@ -46,13 +31,18 @@ Start/Stop a failover group
 
 ## Power off
 
+Host server shutdown
 - Power off host 1 > Wait for completion of the failover
 - Power on host 1 > Wait for completion of the mirror-recovery
 - Power off host 2 > Wait for completion of the failover
 - Power on host 2 > Wait for completion of the mirror-recovery
-- Power off host 1 and 2 > Power on host 1 and 2 > Wait for completion of starting the target VM
+- Power off host 1 and 2 > Power on host 1 and 2 > (If the md is in incosistent state, you need to execute data copy in WebUI Mirror disks tab.) > Wait for completion of starting the target VM
+
+EC VM shutdown
+- Same result as Power off test.
 
 ## NP situation
+
 
 ## Appendix
 

@@ -101,11 +101,6 @@ foreach (@vm_names){
 		next;
 	}
 
-	if (&WaitVmConfigStart()) {
-		$r = 1;
-		next;
-	}
-
 	if ($vm_owner eq $opphost) {
 		if (&VmMigration()) {
 			$r = 1;
@@ -197,16 +192,23 @@ sub WaitIscsiConnect {
 #--------------------------------------------------------------
 sub CsvMove {
 	# No error if the csv is already online on the destination server.
-	if (&execution("$ssh_prefix $ownhost_ip Powershell \"Move-ClusterSharedVolume -Name '$csv_name' -Node $ownhost\"")) {
-		&Log("[E][CsvMove] CSV failed to move.\n");
-		return 1;
+	# After ECX down, the first CSV move command will fail.
+	for (my $i = 0; $i < $max_cnt; $i++){
+		if (&execution("$ssh_prefix $ownhost_ip Powershell \"Move-ClusterSharedVolume -Name '$csv_name' -Node $ownhost\"")) {
+			&Log("[W][CsvMove] CSV failed to move. (cnt=$i)\n");
+		} else {
+			return 0
+		}
+		sleep $interval;
 	}
-	return 0;
+
+	&Log("[E][CsvMove] CSV failed to move.\n");
+	return 1;
 }
 #--------------------------------------------------------------
 sub CsvStart {
 	# No error if the csv is already online on the destination server.
-	# After node down, the first CSV start command will fail.
+	# After host down, the first CSV start command will fail.
 	for (my $i = 0; $i < $max_cnt; $i++){
 		if (&execution("$ssh_prefix $ownhost_ip Powershell \"Start-ClusterResource -Name '$csv_name'\"")) {
 			&Log("[W][CsvStart] CSV failed to start. (cnt=$i)\n");
@@ -221,16 +223,13 @@ sub CsvStart {
 }
 #--------------------------------------------------------------
 sub VmConfigStart {
-	# No error if the resource is already online on the destination server.
-	if (&execution("$ssh_prefix $ownhost_ip Powershell \"Start-ClusterResource 'Virtual Machine Configuration $vm_name'\"")) {
-		&Log("[E][VmConfigStart] Configuration [$vm_name] failed to start.\n");
-		return 1;
-	}
-	return 0;
-}
-#--------------------------------------------------------------
-sub WaitVmConfigStart {
 	for (my $i = 0; $i < $max_cnt; $i++){
+		# No error if the resource is already online on the destination server.
+		if (&execution("$ssh_prefix $ownhost_ip Powershell \"Start-ClusterResource 'Virtual Machine Configuration $vm_name'\"")) {
+			&Log("[E][VmConfigStart] Configuration [$vm_name] failed to start.\n");
+			return 1;
+		}
+
 		&execution("$ssh_prefix $ownhost_ip Powershell Get-ClusterResource");
 		foreach (@lines) {
 			if (/Virtual Machine Configuration $vm_name\s+(\S+)\s.*/) {
@@ -242,11 +241,11 @@ sub WaitVmConfigStart {
 			return 0;
 		}
 
-		&Log("[I][WaitVmConfigStart] [$vm_name] waiting power off. (cnt=$i)\n");
+		&Log("[I][VmConfigStart] Configuration [$vm_name] waiting to start. (cnt=$i)\n");
 		sleep $interval;
 	}
 
-	&Log("[E][WaitVmConfigStart] [$vm_name] powered off not completed. (cnt=$max_cnt)\n");
+	&Log("[E][VmConfigStart] Configuration [$vm_name] failed to start. (cnt=$max_cnt)\n");
 	return 1;
 }
 #--------------------------------------------------------------
@@ -256,6 +255,19 @@ sub VmMigration {
 		$type = "Live";
 	} else {
 		$type = "Quick";
+		&execution("$ssh_prefix $ownhost_ip Powershell Get-ClusterGroup");
+		foreach (@lines) {
+			if (/$vm_name\s+(\S+)\s+(\S+)/) {
+				$vm_owner = $1;
+				$vm_state = $2;
+			}
+		}
+		if ($vm_state eq "Failed") {
+			if (&execution("$ssh_prefix $opphost_ip Powershell \"Stop-ClusterResource -Name 'Virtual Machine $vm_name'\"")) {
+				&Log("[E][VmMigration] [$vm_name] failed to stop.\n");
+				return 1;
+			}
+		}
 	}
 	#else {
 	#	&Log("[E][VmMigration] [$vm_name] is not proper state to be migrated.\n");
