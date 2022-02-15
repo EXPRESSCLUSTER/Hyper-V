@@ -257,6 +257,7 @@ On EC-VMs,
 	```
 	# yes no | ssh-keygen -t rsa -f /root/.ssh/id_rsa -N ""
 	```
+
 1. Copy the public key to host servers
 
 	```
@@ -266,24 +267,15 @@ On EC-VMs,
 
 On host servers,
 1. Merge EC-VM's key files into **administrators_authorized_keys**.
-	```
-	> type C:\ProgramData\ssh\ec-vm1 C:\ProgramData\ssh\ec-vm2 > administrator_authorized_keys
-	```
-1. Add following lines to **sshd_config** in *C:\ProgramData\ssh*
-	```
-	PubkeyAuthentication yes
-	PasswordAuthentication no
-	PermitEmptyPassword yes
-	```
-1. Edit file permission of **administrators_authorized_keys**
-	- Open the property
-	- Click **Advanced** in **Security** tab
-	- Click **Disable inheritance**
-	- Select **Convert inherited permissions into explicit permissions on this object**
-	- Delete **Authenticated Users**
-1. Restart **OpenSSH SSH Server**
 
-After the above all steps, confirm that EC-VM1 and 2 can connect to both servers by ssh command without typing a password.
+	```
+	> c:
+	> cd \ProgramData\ssh
+	> type ec-vm1 ec-vm2 > administrators_authorized_keys
+	> icacls.exe administrators_authorized_keys /inheritance:r /grant "Administrators:F" /grant "SYSTEM:F"
+	```
+
+Confirm that EC-VM1 and 2 can connect to both servers by ssh command without typing a password.
 
 ### Adding EXEC resources to control a VM and live migration
 
