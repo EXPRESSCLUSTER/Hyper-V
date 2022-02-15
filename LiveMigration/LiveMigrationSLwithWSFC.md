@@ -1,4 +1,4 @@
-# Live Migration solution with WSFC **(Note: This content is incomplete and under investigation.)**
+# Live Migration solution with WSFC
 
 Configuring VM Live Migration in Hyper-V host cluster with WSFC.
 
