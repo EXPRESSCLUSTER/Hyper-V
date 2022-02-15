@@ -91,7 +91,7 @@ Once OS installation finished, do as follows.
 1. Install iSCSI **targetcli**, **unzip**, **tar** and **perl** with yum command
 
 	```
-	# yum -y install targetcli unzip tar
+	# yum -y install targetcli unzip tar perl
 	```
 1. Disable and stop iSCSI target
 
