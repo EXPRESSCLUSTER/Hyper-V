@@ -34,8 +34,7 @@ Open **Server Manager** and click **Add roles and features**.
 - Check **Hyper-V** as **Server Roles**
 - Create one virtual switch for external access
 - Check **Allow this server to send and receive live migrations of virtual machines**
-	- Select **Use Credential Security Support Provider (CredSSP)** or **Use Kerberos**
-		- (I need to find which one is the best.)
+	- Select **Use Credential Security Support Provider (CredSSP)**
 - VM's default location can be configured anywhere in the host machine, but it is better to save VMs to another disk for easy maintenance.
 
 After completing Hyper-V installation, configure Hyper-V settings.
@@ -47,6 +46,8 @@ After completing Hyper-V installation, configure Hyper-V settings.
 - Live Migration Settings
 	- Check **Enable incoming and outgoing migrations**
 
+----
+
 ### Host server settings
 
 - Open network adapter settings and set IP address to each vEthernet.
@@ -55,10 +56,14 @@ After completing Hyper-V installation, configure Hyper-V settings.
 
 Subsequent procedures should be operated by the domain account.
 
+----
+
 ### Installing WSFC
 
 Open **Server Manager** and click **Add roles and features**.
 - Check **Failover Clustering** as **Features**
+
+----
 
 ### Configuring WSFC
 
@@ -67,6 +72,8 @@ First, open **Failover Cluster Manager** and create a WSFC cluster.
 Once created a cluster, in **Networks** setting, disable networks other than Management_network and Mirror_network.
 - Right-click network name and open the property.
 	- Select **Do not allow cluster network communication on this network**
+
+----
 
 ### Setting up iSCSI target VM (EC-VM1 and EC-VM2 in the diagram)
 
@@ -85,9 +92,20 @@ After creating EC-VMs, change the VM settings as follows:
 - 2 HDDs, 30GB for OS and 40GB for mirror disk
 
 Once OS installation finished, do as follows.
-1. Configure firewalld
+1. Disable firewalld
+	```
+	# systemctl disable firewalld
+	```
+1. Disable dnf-cache.timer
+	```
+	# systemctl disable dnf-makecache.timer
+	```
 1. Disable SELinux
+	```
+	# sed -i -e 's/^SELINUX=.*/SELINUX=disabled/' /etc/selinux/config
+	```
 1. Network settings
+	- Configure IP addresses, gateway, DNS, proxy
 1. Install iSCSI **targetcli**, **unzip**, **tar** and **perl** with yum command
 
 	```
@@ -99,8 +117,42 @@ Once OS installation finished, do as follows.
 	# systemctl disable target
 	# systemctl stop target
 	```
+1. Configure a disk for ECX mirror disk
+	1. Create partitions for ECX cluster partition and ECX data partition.
+		
+		e.g. Planning to use /dev/sdb for ECX mirror disk.
+		```
+		# parted -s /dev/sdb mklabel msdos mkpart primary 0% 1025MiB mkpart primary 1025MiB 100%
+		```
+1. Configure a symbolic link of the disk device
+
+	On Linux machine, names of disk devices may change sometimes because Linux OS determines device names in the order in which they are recognized.
+
+	By creating a symbolic link of the disk device, you can use an unique name even if the device name were changed.
+
+	1. Check disk IDs
+		```
+		# /lib/udev/scsi_id --whitelisted --device=/dev/sdb
+		3600224804fb4d824c64c0f4156f86fc9
+		```
+	1. Create a rule file for a symbolic link
+		```
+		# vi /etc/udev/rules.d/99-clusterpro-devices.rules
+		KERNEL=="sd*[^0-9]",ENV{ID_SERIAL}=="",IMPORT{program}="/lib/udev/scsi_id --whitelisted --device=/dev/%k"
+		KERNEL=="sd*[^0-9]",ENV{ID_SERIAL}=="",IMPORT{parent}=="ID_*"
+		ENV{ID_SERIAL}=="3600224804fb4d824c64c0f4156f86fc9",SYMLINK+="cp-diska%n"
+		```
+
 1. Install ECX
-1. Create a ECX cluster
+1. Reboot OS
+1. Confirm that the symbolic link is enabled.
+	```
+	# ls -l /dev/cp-*
+	lrwxrwxrwx 1 root root 3 Feb 16 15:42 /dev/cp-diska -> sdc
+	lrwxrwxrwx 1 root root 4 Feb 16 17:24 /dev/cp-diska1 -> sdc1
+	lrwxrwxrwx 1 root root 4 Feb 16 17:04 /dev/cp-diska2 -> sdc2
+	```
+1. Once you complete the above steps on both VMs, create a ECX cluster
 
 At this point, required ECX resources are
 - Witness heartbeat
@@ -109,10 +161,14 @@ At this point, required ECX resources are
 - Floating IP address
 	- Should belong to the network connecting to iSCSI_switch
 - Mirror disk
-	- File system is none
+	- Data Partition Device Name: /dev/cp-diska2
+	- Cluster Partition Device Name: /dev/cp-diska2
+	- File System: none
 - Exec
 	- e.g. Resource name is *exec-iscsi*
 	- Should depend on a Floating IP address and Mirror disk
+		- Add Floating IP address and Mirror disk in **Dependency** tab.
+	- Replace scripts with new scripts below.
 
 		*start.sh*
 		```
@@ -130,6 +186,8 @@ At this point, required ECX resources are
 		echo "Stopped  iSCSI Target ($?)"
 		exit 0
 		```
+
+----
 
 ### Coniguring iSCSI target
 
@@ -159,6 +217,8 @@ At this point, required ECX resources are
 1. Move a failover group to EC-VM2 and configure as same.
 1. Move a failover group to EC-VM1
 
+----
+
 ### Connecting to iSCSI target from host servers
 
 1. Open **iSCSI Initiator**
@@ -167,6 +227,8 @@ At this point, required ECX resources are
 
 This disk will be configured as WSFC cluster shared volume from next steps.
 
+----
+
 ### Configuring CSV
 
 1. Open **Disk Management** on either host server
@@ -174,6 +236,8 @@ This disk will be configured as WSFC cluster shared volume from next steps.
 1. Open **Disk Management** on another host server, and make it online.
 1. Open **Failover Cluster Manager**
 1. In **Disks** page, add the disk and set it as cluster shared volume.
+
+----
 
 ### Configuring quorum disk
 
@@ -194,6 +258,8 @@ You can colocate it with ECX witness server and configure it as iSCSI target.
 1. **Configure a disk witness**
 1. Check the disk
 
+----
+
 ### Creating a protected VM in CSV
 
 In case you create a VM newly,
@@ -203,10 +269,14 @@ In case you import an existing VM,
 - Import a VM on **Hyper-V Manager**
 - In **Role** page, select **Configure Role**
 
+----
+
 ### Configuring WSFC Live Migration
 
 - In **Networks** page, select **Live Migration Settings**
 - Uncheck networks other than VM_network
+
+----
 
 ### Configuring WSFC settings to restrain WSFC recovery action
 
@@ -239,6 +309,8 @@ Disabling a VM failover function:
 	- **Maximum failures in the specified period**: 0
 	- **Period (hours)**: 0
 	- **Prevent failback**
+
+----
 
 ### Configuring ssh settings
 
@@ -277,10 +349,9 @@ On host servers,
 
 Confirm that EC-VM1 and 2 can connect to both servers by ssh command without typing a password.
 
-### Adding EXEC resources to control a VM and live migration
+----
 
-Two kinds of EXEC resource are needed per VM.
-One is for registering a VM to Hyper-V and another is for controlling a VM.
+### Adding EXEC resources to control a VM and live migration
 
 1. Downloading scripts from GitHub repository
 1. Adding to a EXEC resource to controll a VM
@@ -292,7 +363,9 @@ One is for registering a VM to Hyper-V and another is for controlling a VM.
 	- Editing **Configuration** section in the stop script.
 	- **Log Output Path** in **Tuning** page is */opt/nec/clusterpro/log/exec-VMNAME.log*
 	- Checking *Rotate Log* in **Tuning** page
-1. Applying the cluster connfiguration
+1. Applying the cluster configuration
+
+----
 
 ### Adding custom monitor resource for a VM
 
@@ -320,6 +393,8 @@ One custom monitor resource is needed per VM, and one is needed per cluster.
 	- **Recovery Action** is **Custom settings**
 	- **Recovery Target** is **LocalServer**
 	- **Final Action** is **No operation**
+
+----
 
 ## How to operate a cluter
 
