@@ -120,7 +120,7 @@ Once OS installation finished, do as follows.
 1. Configure a disk for ECX mirror disk
 	1. Create partitions for ECX cluster partition and ECX data partition.
 		
-		e.g. Planning to use /dev/sdb for ECX mirror disk.
+		e.g. In case of using /dev/sdb for ECX mirror disk.
 		```
 		# parted -s /dev/sdb mklabel msdos mkpart primary 0% 1025MiB mkpart primary 1025MiB 100%
 		```
@@ -131,17 +131,22 @@ Once OS installation finished, do as follows.
 	By creating a symbolic link of the disk device, you can use an unique name even if the device name were changed.
 
 	1. Check disk IDs
+
+		e.g. In case of using /dev/sdb for ECX mirror disk.
 		```
 		# /lib/udev/scsi_id --whitelisted --device=/dev/sdb
 		3600224804fb4d824c64c0f4156f86fc9
 		```
 	1. Create a rule file for a symbolic link
+
+		e.g.
 		```
 		# vi /etc/udev/rules.d/99-clusterpro-devices.rules
 		KERNEL=="sd*[^0-9]",ENV{ID_SERIAL}=="",IMPORT{program}="/lib/udev/scsi_id --whitelisted --device=/dev/%k"
 		KERNEL=="sd*[^0-9]",ENV{ID_SERIAL}=="",IMPORT{parent}=="ID_*"
 		ENV{ID_SERIAL}=="3600224804fb4d824c64c0f4156f86fc9",SYMLINK+="cp-diska%n"
 		```
+		You need to edit only *3600224804fb4d824c64c0f4156f86fc9* depending on your environment.
 
 1. Install ECX
 1. Reboot OS
