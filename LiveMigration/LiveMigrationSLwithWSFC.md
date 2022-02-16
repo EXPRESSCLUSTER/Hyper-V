@@ -167,7 +167,7 @@ At this point, required ECX resources are
 	- Should belong to the network connecting to iSCSI_switch
 - Mirror disk
 	- Data Partition Device Name: /dev/cp-diska2
-	- Cluster Partition Device Name: /dev/cp-diska2
+	- Cluster Partition Device Name: /dev/cp-diska1
 	- File System: none
 - Exec
 	- e.g. Resource name is *exec-iscsi*
