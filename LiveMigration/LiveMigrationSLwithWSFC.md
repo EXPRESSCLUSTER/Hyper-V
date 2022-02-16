@@ -21,11 +21,11 @@ Configuring VM Live Migration in Hyper-V host cluster with WSFC.
 
 ## Host servers' spec
 
-- Windows Server 2019 Datacenter (Desktop Experience)
+- Windows Server 2022 Datacenter (Desktop Experience)
 - 4 CPU
-- 9GB RAM
+- 16GB RAM
 - 4 NICs
-- 2 HDDs, 40GB for OS and 60GB for EC-VM
+- 2 HDDs, 40GB for OS and 75GB for EC-VM
 
 ## Setup procedure
 ### Installing Hyper-V
@@ -82,7 +82,7 @@ After creating EC-VMs, change the VM settings as follows:
 - 1 CPU
 - 4GB RAM
 - 3 NICs
-- 2 HDDs, 30GB for OS and 25GB for mirror disk
+- 2 HDDs, 30GB for OS and 40GB for mirror disk
 
 Once OS installation finished, do as follows.
 1. Configure firewalld
