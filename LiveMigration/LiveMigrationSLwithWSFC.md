@@ -270,6 +270,8 @@ You can colocate it with ECX witness server and configure it as iSCSI target.
 In case you create a VM newly,
 - In **Role** page, select **New Virtual Machine** in **Virtual Machines**
 
+  In the step *Connect Virtual Hard Disk*, select *Create a virtual hard disk* and specify the *Location* as as `C:\ClusterStorage\Volume1\Virtual Hard Disks\`
+
 In case you import an existing VM,
 - Import a VM on **Hyper-V Manager**
 - In **Role** page, select **Configure Role**
