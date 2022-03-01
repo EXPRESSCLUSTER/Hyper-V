@@ -194,7 +194,7 @@ At this point, required ECX resources are
 
 ----
 
-### Coniguring iSCSI target
+### Configuring iSCSI target
 
 1. Confirm that a failover group is running on EC-VM1
 1. Configure NMP1 as a target disk
@@ -251,7 +251,7 @@ A shared disk that is accessible from both hosts is needed outside host servers.
 A quorum disk size should be larger than 512MB.
 - https://docs.microsoft.com/en-us/windows-server/failover-clustering/manage-cluster-quorum
 
-You can colocate it with ECX witness server and configure it as iSCSI target.
+You can co-locate it with ECX witness server and configure it as iSCSI target.
 
 1. Open **Disk Management** on either host server
 1. Configure the disk as NTFS
@@ -344,13 +344,13 @@ On EC-VMs,
 On host servers,
 1. Merge EC-VM's key files into **administrators_authorized_keys**.
 	```
-	> type C:\ProgramData\ssh\ec-vm1 C:\ProgramData\ssh\ec-vm2 > administrator_authorized_keys
+	> type C:\ProgramData\ssh\ec-vm1 C:\ProgramData\ssh\ec-vm2 > administrators_authorized_keys
 	```
 1. Add following lines to **sshd_config** in *C:\ProgramData\ssh*
 	```
 	PubkeyAuthentication yes
 	PasswordAuthentication no
-	PermitEmptyPassword yes
+	PermitEmptyPasswords yes
 	```
 1. Edit file permission of **administrators_authorized_keys**
 	- Open the property
@@ -367,7 +367,7 @@ After the above all steps, confirm that EC-VM1 and 2 can connect to both servers
 ### Adding EXEC resources to control a VM and live migration
 
 1. Downloading scripts from GitHub repository
-1. Adding to a EXEC resource to controll a VM
+1. Adding to a EXEC resource to control a VM
 	- e.g. Resource name is *exec-VMNAME*
 	- Depends on *exec-iscsi*
 	- Replacing *start.sh* with *vm-start.pl*
@@ -409,11 +409,11 @@ One custom monitor resource is needed per VM, and one is needed per cluster.
 
 ----
 
-## How to operate a cluter
+## How to operate a cluster
 
 *exec-VMNAME*
 - When it starts, VM is registered on Hyper-V Manager and powered on.
-- When it stops, VM is unregistered on Hyper-V Manager and powerd off.
+- When it stops, VM is unregistered on Hyper-V Manager and powered off.
 
 *genw-VMNAME*
 - Executing the recovery action if VM is not running on its host server.
