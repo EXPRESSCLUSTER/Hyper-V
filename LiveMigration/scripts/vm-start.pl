@@ -110,7 +110,7 @@ foreach (@vm_names){
 
 	# vm_owner is definitely ownhost because if it was running on opphost,
 	# vm was migrated to ownhost or this program already exited due to migration failure.
-	if ($vm_state eq "Offline") {
+	if ($vm_state ne "Online") {
 		if (&VmPowerOn()) {
 			$r = 1;
 			next;
@@ -255,6 +255,7 @@ sub VmMigration {
 		$type = "Live";
 	} else {
 		$type = "Quick";
+
 		&execution("$ssh_prefix $ownhost_ip Powershell Get-ClusterGroup");
 		foreach (@lines) {
 			if (/$vm_name\s+(\S+)\s+(\S+)/) {
@@ -269,18 +270,44 @@ sub VmMigration {
 			}
 		}
 	}
-	#else {
-	#	&Log("[E][VmMigration] [$vm_name] is not proper state to be migrated.\n");
-	#	return 1;
-	#}
+
 	if (&execution("$ssh_prefix $ownhost_ip Powershell \"Set-Variable ProgressPreference SilentlyContinue; Move-ClusterVirtualMachineRole -Name $vm_name -Node $ownhost -MigrationType $type\"")) {
 		&Log("[E][VmMigration] [$vm_name] $type migration failed.\n");
+		
+		# Sometimes it takes long time to stop the target VM when an opposite host shutdown.
+		# In such situation, the target VM's state is "Online".
+		# Retry a migration with type "Live".
+		if ($type eq "Quick") {
+			$type = "Live";
+			if (&execution("$ssh_prefix $ownhost_ip Powershell \"Set-Variable ProgressPreference SilentlyContinue; Move-ClusterVirtualMachineRole -Name $vm_name -Node $ownhost -MigrationType $type\"")) {
+				&Log("[E][VmMigration] [$vm_name] $type migration failed.\n");
+				return 1;
+			}
+			return 0;
+		}
+		
 		return 1;
 	}
 	return 0;
 }
 #--------------------------------------------------------------
 sub VmPowerOn {
+	# Assuming the situation where the VM is failed state and its owner is this machine.
+	# This situation occurs sometimes under Host OS shutdown test.
+	&execution("$ssh_prefix $ownhost_ip Powershell Get-ClusterGroup");
+	foreach (@lines) {
+		if (/$vm_name\s+(\S+)\s+(\S+)/) {
+			$vm_state = $2;
+		}
+	}
+	if ($vm_state eq "Failed") {
+		if (&execution("$ssh_prefix $opphost_ip Powershell \"Stop-ClusterResource -Name 'Virtual Machine $vm_name'\"")) {
+			&Log("[E][VmPoerOn] [$vm_name] failed to stop.\n");
+			return 1;
+		}
+	}
+
+	# Start VM
 	if (&execution("$ssh_prefix $ownhost_ip Powershell \"Set-Variable ProgressPreference SilentlyContinue; Start-VM $vm_name\"")) {
 		&Log("[E][VmPowerOn] [$vm_name] failed to start.\n");
 		return 1;

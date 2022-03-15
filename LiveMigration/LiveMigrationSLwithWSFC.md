@@ -80,8 +80,11 @@ Once created a cluster, in **Networks** setting, disable networks other than Man
 Open **Hyper-V Manager** and create a new VM.
 
 After creating EC-VMs, change the VM settings as follows:
-- **Automatic Start Action**: **Always start this virtual machine automatically**
-- **Startup delay**: 5 seconds
+- **Automatic Start Action**
+	- **Always start this virtual machine automatically**
+	- **Startup delay**: 5 seconds
+- **Automatic Stop Action**
+	- **Shut down the guest operating system**
 
 #### EC-VM's spec
 - CentOS Linux release 8.2.2004 (Core)
@@ -273,6 +276,10 @@ In case you create a VM newly,
 In case you import an existing VM,
 - Import a VM on **Hyper-V Manager**
 - In **Role** page, select **Configure Role**
+
+After creating a protected VM, configure as follows on **Hyper-V Manager**.
+- **Automatic Stop Action**
+	- **Shut down the guest operating system**
 
 ----
 
