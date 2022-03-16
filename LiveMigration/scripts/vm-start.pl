@@ -108,13 +108,12 @@ foreach (@vm_names){
 		}
 	}
 
-	# vm_owner is definitely ownhost because if it was running on opphost,
+	# Vm_owner is definitely ownhost because if it was running on opphost,
 	# vm was migrated to ownhost or this program already exited due to migration failure.
-	if ($vm_state ne "Online") {
-		if (&VmPowerOn()) {
-			$r = 1;
-			next;
-		}
+	# Start-VM shows no error if the VM is already running.
+	if (&VmPowerOn()) {
+		$r = 1;
+		next;
 	}
 }
 exit $r;
@@ -264,7 +263,7 @@ sub VmMigration {
 			}
 		}
 		if ($vm_state eq "Failed") {
-			if (&execution("$ssh_prefix $opphost_ip Powershell \"Stop-ClusterResource -Name 'Virtual Machine $vm_name'\"")) {
+			if (&execution("$ssh_prefix $ownhost_ip Powershell \"Stop-ClusterResource -Name 'Virtual Machine $vm_name'\"")) {
 				&Log("[E][VmMigration] [$vm_name] failed to stop.\n");
 				return 1;
 			}
@@ -285,7 +284,7 @@ sub VmMigration {
 			}
 			return 0;
 		}
-		
+
 		return 1;
 	}
 	return 0;
@@ -301,8 +300,8 @@ sub VmPowerOn {
 		}
 	}
 	if ($vm_state eq "Failed") {
-		if (&execution("$ssh_prefix $opphost_ip Powershell \"Stop-ClusterResource -Name 'Virtual Machine $vm_name'\"")) {
-			&Log("[E][VmPoerOn] [$vm_name] failed to stop.\n");
+		if (&execution("$ssh_prefix $ownhost_ip Powershell \"Stop-ClusterResource -Name 'Virtual Machine $vm_name'\"")) {
+			&Log("[E][VmPowerOn] [$vm_name] failed to stop.\n");
 			return 1;
 		}
 	}
