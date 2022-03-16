@@ -278,6 +278,8 @@ In case you import an existing VM,
 - In **Role** page, select **Configure Role**
 
 After creating a protected VM, configure as follows on **Hyper-V Manager**.
+- **Automatic Start Action**
+	- **Nothing**
 - **Automatic Stop Action**
 	- **Shut down the guest operating system**
 
