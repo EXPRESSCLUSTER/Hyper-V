@@ -119,3 +119,20 @@ Powershell command list
 PS C:\Users\Administrator.2016DOM> Get-Command -Module FailoverClusters | Out-GridView
 PS C:\Users\Administrator.2016DOM> Get-Command -Module Hyper-V | Out-GridView
 ```
+
+---
+Collect WSFC logs
+```
+PS C:\Users\Administrator.2016DOM\Downloads> get-clusterlog -destination . -Timespan 10080
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+-a----        3/23/2022   6:26 PM       22763610 ws2019-host-1_cluster.log
+-a----        3/23/2022   6:26 PM      130351286 ws2019-host-2_cluster.log
+
+
+PS C:\Users\Administrator.2016DOM\Downloads>
+```
+*Destination* option specifies a location where log files are saved.
+
+*Timespan* option specifies a time period covered by the logs. The above sample command covers the last 10080 minutes (equivalent to 1 week).
