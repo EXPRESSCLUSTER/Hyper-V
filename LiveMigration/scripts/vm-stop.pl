@@ -42,12 +42,12 @@ my $ownhost_ip = "";
 my $opphost_ip = "";
 my $clp_factor = $ENV{CLP_FACTOR};
 
-my $tmp = `ip address | grep $ec1`;
+my $tmp = `ip address | grep $ec1/`;
 if ($? == 0) {
 	$ownhost_ip = $host1_ip;
 	$opphost_ip = $host2_ip;
 } else {
-	$tmp = `ip address | grep $ec2`;
+	$tmp = `ip address | grep $ec2/`;
 	if ($? == 0) {
 		$ownhost_ip = $host2_ip;
 		$opphost_ip = $host1_ip;
