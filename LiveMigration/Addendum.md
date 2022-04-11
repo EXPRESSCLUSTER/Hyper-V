@@ -43,3 +43,4 @@ If you need to dig deeper, examine the WSFC and ExpressCluster log files for the
   
 WSFC log: [Operational] 000010c0.0000179c::2022/03/30-15:27:15.681 INFO  The cluster load balancer has identified the current node is exceeding the CPU or memory usage threshold.  Virtual Machines will be moved to a new node to balance the cluster. 
   
+Solution: Increase memory on host machine
