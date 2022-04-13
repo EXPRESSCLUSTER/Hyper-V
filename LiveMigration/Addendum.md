@@ -4,19 +4,23 @@ This section's purpose is to address some situations that might be experienced w
 
 ## Phenomenon
 ### Unexpected Live Migration
-Scenario: You obvserve unexpected live migration of the guest VM performed by Windows Failover Cluster Manager. The owner node changes to the standby host server and then ExpressCluster reacts by failing the group over to the standby ExpressCluster server.
+Scenario: You observe an unexpected live migration of the guest VM performed by Windows Failover Cluster Manager. The owner node changes to the standby host server and then ExpressCluster reacts by failing the group over to the standby ExpressCluster server.
 
-The reason may be insufficient CPU or memory on the host machine. The guest VM may not have enough memory to run, leading to a failover.
-Troubleshooting    
+The cause may be insufficient CPUs or memory on the host machine. The guest VM may not have enough memory to run, leading to a failover.   
+
+**Troubleshooting**    
+
 If you are lucky, the error messages will be obvious:    
+
 e.g. Hyper-V Manager will display something like the following by the guest VM:    
-An error occurred while attempting to start the selected virtual machine(s).
 
-'<guest vm>' failed to start.
+    An error occurred while attempting to start the selected virtual machine(s).
 
-Not enough memory in the system to start the virtual machine <guest vm>.
+    '\<guest vm\>' failed to start.
 
-Could not initialize memory: Ran out of memory (0x8007000E).   
+    Not enough memory in the system to start the virtual machine \<guest vm\>.
+
+    Could not initialize memory: Ran out of memory (0x8007000E).   
 
 e.g. Guest VM connection window may have the following error:    
 The application encountered an error while attempting to change the state of 'TESTVM'.
