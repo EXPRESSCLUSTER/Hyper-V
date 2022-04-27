@@ -31,7 +31,7 @@ Configuring VM Live Migration in Hyper-V host cluster with WSFC.
 ### Installing Hyper-V
 
 Open **Server Manager** and click **Add roles and features**.
-- Check **Hyper-V** as **Server Roles**
+- Check **Hyper-V** under **Server Roles**
 - Create one virtual switch for external access
 - Check **Allow this server to send and receive live migrations of virtual machines**
 	- Select **Use Credential Security Support Provider (CredSSP)**
