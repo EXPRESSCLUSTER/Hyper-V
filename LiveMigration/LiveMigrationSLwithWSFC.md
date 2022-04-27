@@ -35,7 +35,7 @@ Open **Server Manager** and click **Add roles and features**.
 - Create one virtual switch for external access
 - Check **Allow this server to send and receive live migrations of virtual machines**
 	- Select **Use Credential Security Support Provider (CredSSP)**
-- VM's default location can be configured anywhere in the host machine, but it is better to save VMs to another disk for easy maintenance.
+- VM's default location can be configured anywhere on the host machine, but it is better to save VMs to another disk for easy maintenance.
 
 After completing Hyper-V installation, configure Hyper-V settings.
 - Create Virtual Switches
