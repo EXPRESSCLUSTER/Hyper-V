@@ -64,7 +64,7 @@
 					- Type: **EXEC resource**
 					- Name: e.g. exec-iscsi
 				- Dependency
-					Uncheck *Follow the default dependency*
+					Uncheck **Follow the default dependency**
 					- Add the Floating IP resource
 					- Add the Mirror disk resource
 				- Recovery Operation
@@ -85,7 +85,7 @@
 					echo "Stopped  iSCSI Target ($?)"
 					exit 0
 - Monitor
-			- Default
+	- Default
 5. **Apply the Configuration File**
 6. Change to **Operation mode**, **Status** tab, and **Start** the failover group on EC1
 
