@@ -64,7 +64,7 @@
 					- Type: **EXEC resource**
 					- Name: e.g. exec-iscsi
 				- Dependency
-					Uncheck **Follow the default dependency**
+					- Uncheck **Follow the default dependency**
 					- Add the Floating IP resource
 					- Add the Mirror disk resource
 				- Recovery Operation
