@@ -71,19 +71,19 @@
 					- Default
 				- Details
 					- Select and Edit start.sh
-					- Delete all contents and replace with the following:
-					#!/bin/sh -eu
-					echo "Starting iSCSI Target"
-					systemctl start target
-					echo "Started  iSCSI Target ($?)"
-					exit 0
+					- Delete all contents and replace with the following:    
+                                          *#!/bin/sh -eu   
+                                          echo "Starting iSCSI Target"   
+                                          systemctl start target   
+                                          echo "Started  iSCSI Target ($?)"   
+                                          exit 0*     
 					- Select and Edit stop.sh
-					- Delete all contents and replace with the following:
-					#!/bin/sh -eu
-					echo "Stopping iSCSI Target"
-					systemctl stop target
-					echo "Stopped  iSCSI Target ($?)"
-					exit 0
+					- Delete all contents and replace with the following:    
+					  *#!/bin/sh -eu    
+					  echo "Stopping iSCSI Target"    
+					  systemctl stop target    
+					  echo "Stopped  iSCSI Target ($?)"    
+					  exit 0*    
 - Monitor
 	- Default
 5. **Apply the Configuration File**
