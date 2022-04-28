@@ -50,41 +50,36 @@ After completing Hyper-V installation, configure Hyper-V settings in Hyper-V Man
 
 ### Host server settings
 
-- Open network adapter settings and set IP address to each vEthernet.
-- Join servers to a domain and configure a firewall of the domain.
+- Open network adapter settings and set an IP address for each vEthernet adapter.
+- Join servers to a domain and configure the firewall of the domain.
 - Login to the domain account.
 
-Subsequent procedures should be operated by the domain account.
+Subsequent procedures should be performed using the domain account.
 
 ----
 
 ### Installing WSFC
 
 Open **Server Manager** and click **Add roles and features**.
-- Check **Failover Clustering** as **Features**
+- Check **Failover Clustering** under **Features** and follow the wizard to install it.
 
 ----
 
 ### Configuring WSFC
 
-First, open **Failover Cluster Manager** and create a WSFC cluster.
+Open **Failover Cluster Manager** and create a WSFC cluster between the host servers. Do not add all eligible storage while running the Create Cluster Wizard. A CSV disk will be added to the cluster later.
 
-Once created a cluster, in **Networks** setting, disable networks other than Management_network and Mirror_network.
-- Right-click network name and open the property.
-	- Select **Do not allow cluster network communication on this network**
+_A WSFC installation and configuration guide can be found [here]_(https://docs.microsoft.com/en-us/windows-server/failover-clustering/create-failover-cluster).
+
+Once a cluster is created, in **Networks** setting, disable networks other than Management_network and Mirror_network.
+- Right-click network name and open properties.
+	- Select **Do not allow cluster network communication on this network**.
 
 ----
 
 ### Setting up iSCSI target VM (EC-VM1 and EC-VM2 in the diagram)
 
-Open **Hyper-V Manager** and create a new VM.
-
-After creating EC-VMs, change the VM settings as follows:
-- **Automatic Start Action**
-	- **Always start this virtual machine automatically**
-	- **Startup delay**: 5 seconds
-- **Automatic Stop Action**
-	- **Shut down the guest operating system**
+Open **Hyper-V Manager** on each host machine and create a new VM.
 
 #### EC-VM's spec
 - CentOS Linux release 8.2.2004 (Core)
@@ -94,7 +89,14 @@ After creating EC-VMs, change the VM settings as follows:
 - 3 NICs
 - 2 HDDs, 30GB for OS and 25GB for mirror disk
 
-Once OS installation finished, do as follows.
+After creating EC-VMs, change the VM settings as follows (stop them first!):
+- **Automatic Start Action**
+	- **Always start this virtual machine automatically**
+	- **Startup delay**: 5 seconds
+- **Automatic Stop Action**
+	- **Shut down the guest operating system**
+
+Once OS installation is finished, do the following on each EC VM:
 1. Disable firewalld
 	```
 	# systemctl disable firewalld
@@ -120,22 +122,22 @@ Once OS installation finished, do as follows.
 	# systemctl disable target
 	# systemctl stop target
 	```
-1. Configure a disk for ECX mirror disk
-	1. Create partitions for ECX cluster partition and ECX data partition.
+1. Configure a disk for ECX mirroring
+	1. Create an ECX cluster partition and ECX data partition.
 		
-		e.g. In case of using /dev/sdb for ECX mirror disk.
+		e.g. In the case /dev/sdb is used for the ECX mirror disk.
 		```
 		# parted -s /dev/sdb mklabel msdos mkpart primary 0% 1025MiB mkpart primary 1025MiB 100%
 		```
-1. Configure a symbolic link of the disk device
+1. Configure a symbolic link for the disk device
 
-	On Linux machine, names of disk devices may change sometimes because Linux OS determines device names in the order in which they are recognized.
+	On a Linux machine, names of disk devices may change sometimes because the Linux OS determines device names in the order in which they are recognized after startup.
 
-	By creating a symbolic link of the disk device, you can use an unique name even if the device name were changed.
+	By creating a symbolic link for the disk device, you can use a static unique name to reference the disk, even if the device name is changed.
 
 	1. Check disk IDs
 
-		e.g. In case of using /dev/sdb for ECX mirror disk.
+		e.g. In the case /dev/sdb is used for the ECX mirror disk (with sample output).
 		```
 		# /lib/udev/scsi_id --whitelisted --device=/dev/sdb
 		3600224804fb4d824c64c0f4156f86fc9
@@ -149,9 +151,12 @@ Once OS installation finished, do as follows.
 		KERNEL=="sd*[^0-9]",ENV{ID_SERIAL}=="",IMPORT{parent}=="ID_*"
 		ENV{ID_SERIAL}=="3600224804fb4d824c64c0f4156f86fc9",SYMLINK+="cp-diska%n"
 		```
-		You need to edit only *3600224804fb4d824c64c0f4156f86fc9* depending on your environment.
+		You only need to edit *3600224804fb4d824c64c0f4156f86fc9* depending on your environment.
 
 1. Install ECX
+    rpm -ivh expresscls*.rpm
+1. Register ECX license files
+    clplcnsc -i ECX*.key
 1. Reboot OS
 1. Confirm that the symbolic link is enabled.
 	```
@@ -160,7 +165,7 @@ Once OS installation finished, do as follows.
 	lrwxrwxrwx 1 root root 4 Feb 16 17:24 /dev/cp-diska1 -> sdc1
 	lrwxrwxrwx 1 root root 4 Feb 16 17:04 /dev/cp-diska2 -> sdc2
 	```
-1. Once you complete the above steps on both VMs, create a ECX cluster
+1. Once you complete the above steps on both EC VMs, create an ECX cluster
 
 At this point, required ECX resources are
 - Witness heartbeat
