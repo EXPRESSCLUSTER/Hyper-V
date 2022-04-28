@@ -88,4 +88,3 @@
 	- Default
 5. **Apply the Configuration File**
 6. Change to **Operation mode**, **Status** tab, and **Start** the failover group on EC1
-
