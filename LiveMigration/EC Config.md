@@ -15,14 +15,14 @@
 - Interconnects    
   *\*Add/remove rows as needed*    
 
-|Priority |Type |MDC |EC1 |EC2 |
-|:---------|:-------|:---|:---|:---|
-| 1 | Kernel Mode | Do Not Use | 172.31.255.11 | 172.31.255.12 |
-| 2 | Mirror Communication Only | mdc1 | 172.31.253.11 | 172.31.253.12 |
-| 3 | Witness |	Do Not Use | Use | Use |
+    |Priority |Type |MDC |EC1 |EC2 |
+    |:---------|:-------|:---|:---|:---|
+    | 1 | Kernel Mode | Do Not Use | 172.31.255.11 | 172.31.255.12 |
+    | 2 | Mirror Communication Only | mdc1 | 172.31.253.11 | 172.31.253.12 |
+    | 3 | Witness |	Do Not Use | Use | Use |
 
-- Select the Witness line and click on Properties in the upper left
-	- Target Host: IP address of witness server		
+	- Select the Witness line and click on Properties in the upper left
+	    - Target Host: IP address of witness server		
 - NP Resolution
 	- An HTTP entry should exist in the **NP Resolution List** for the witness server
 - **Group**
