@@ -4,18 +4,18 @@ Configuring VM Live Migration in Hyper-V host cluster with WSFC.
 
 ## Architecture
 
-- ECX is installed on VMs where iSCSI target service is running, and ECX replicates the disk configured as iSCSI target.
+- ECX is installed on VMs where iSCSI target service is running. ECX replicates the disk configured as an iSCSI target.
 	- Hyper-V VMs are created on the iSCSI target disk.
 	- ECX data mirroring provides a virtual shared disk for WSFC.
-	- WSFC uses the virtual shared disk as Cluster Shared Volume (CSV).
-- ECX protects VMs on Hyper-V, means start / stop / monitor and realizing failover of VMs across Hyper-V boxes.
+	- WSFC uses the virtual shared disk as a Cluster Shared Volume (CSV).
+- ECX protects VMs on Hyper-V (start / stop / monitor) and performs failover of VMs across Hyper-V boxes.
 
 	![Architecture](Hyper-V-cluster-architecture-WSFC.PNG)
 
 ## Network
 
-- Separating network for VM / management of VM and cluster / mirroring / iSCSI / Live Migration.
-- One server is needed outside a WSFC cluster, for ECX witness and WSFC quorum disk. Ideally this server should also be clustered, but currently this document describes a configuration with two WSFC servers and one quorum disk.
+- Separate network for VM / management of VM and cluster / mirroring / iSCSI / Live Migration.
+- One server is needed outside a WSFC cluster for ECX witness and WSFC quorum disk. Ideally this server should also be clustered, but currently this document describes a configuration with two WSFC servers and one quorum disk.
 
 	![Network](Network-WSFC.PNG)
 
@@ -30,21 +30,21 @@ Configuring VM Live Migration in Hyper-V host cluster with WSFC.
 ## Setup procedure
 ### Installing Hyper-V
 
-Open **Server Manager** and click **Add roles and features**.
-- Check **Hyper-V** under **Server Roles**
-- Create one virtual switch for external access
-- Check **Allow this server to send and receive live migrations of virtual machines**
-	- Select **Use Credential Security Support Provider (CredSSP)**
+Open **Server Manager** and click **Add roles and features** from the dashboard.
+- Check **Hyper-V** under **Server Roles**.
+- Create one virtual switch for external access.
+- Check **Allow this server to send and receive live migrations of virtual machines**.
+	- Select **Use Credential Security Support Provider (CredSSP)**.
 - VM's default location can be configured anywhere on the host machine, but it is better to save VMs to another disk for easy maintenance.
 
-After completing Hyper-V installation, configure Hyper-V settings.
-- Create Virtual Switches
+After completing Hyper-V installation, configure Hyper-V settings in Hyper-V Manager.
+- Create Virtual Switches in Virtual Switch Manager.
 	- Management_switch was created during Hyper-V installation.
-	- Mirror_switch (External) should be created newly.
-	- iSCSI_switch (External) should be created newly.
-	- VM_switch (External) should be created newly.
-- Live Migration Settings
-	- Check **Enable incoming and outgoing migrations**
+	- Mirror_switch (External) should be newly created.
+	- iSCSI_switch (External) should be newly created.
+	- VM_switch (External) should be newly created.
+- Edit Live Migrations Settings (under Hyper-V Settings)
+	- Check **Enable incoming and outgoing migrations**.
 
 ----
 
