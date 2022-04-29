@@ -291,7 +291,7 @@ In the case that you import an existing VM into Failover Cluster Manager
 - Import a VM into **Hyper-V Manager** (or use an existing VM).
 - In Failover Cluster Manager's **Roles** page, select **Configure Role**, and then select **Virtual Machine**.
 
-After creating or importing a protected VM, configure VM settings as follows on **Hyper-V Manager**.
+After creating or importing a protected VM, configure VM settings as follows on **Hyper-V Manager**:
 - **Automatic Start Action**
 	- **Nothing**
 - **Automatic Stop Action**
@@ -301,8 +301,8 @@ After creating or importing a protected VM, configure VM settings as follows on 
 
 ### Configuring WSFC Live Migration
 
-- In **Networks** page, select **Live Migration Settings**
-- Uncheck networks other than VM_network
+- In Failover Cluster Manager's **Networks** page, select **Live Migration Settings**.
+- Uncheck networks other than VM_network.
 
 ----
 
@@ -310,7 +310,7 @@ After creating or importing a protected VM, configure VM settings as follows on 
 
 To prevent conflicts between recovery actions, WSFC recovery action needs to be disabled.
 
-Checking a current quarantine configuration:
+Check the current quarantine configuration:
 ```
 > get-cluster | Select Name,Resiliency*,Quarantine*
 
@@ -321,19 +321,19 @@ QuarantineDuration      : 7200
 QuarantineThreshold     : 3
 ```
 
-Changing a quarantine configuration:
+Change the quarantine configuration:
 ```
 > (Get-Cluster).ResiliencyDefaultPeriod = 9999
 > (Get-Cluster).QuarantineThreshold = 9999
 ```
 
-WSFC behavior after executing the above command:
-- After WSFC detects another cluster node is isolated, WSFC wait 9999 seconds until it starts recovery action.
-- WSFC quarantines a cluster node that has be turned off unintentionally 9999 times in a hour.
+WSFC behavior after executing the above commands:
+- After WSFC detects the other cluster node is isolated, WSFC wait 9999 seconds until it starts recovery action.
+- WSFC quarantines a cluster node that has been turned off unintentionally 9999 times in a hour.
 
-Disabling a VM failover function:
-1. Open VM property on **Failover Cluster Manager**.
-1. In **Failover** tab, change settings as follows.
+Disabe the VM failover function:
+1. Open VM property in **Failover Cluster Manager**.
+1. In **Failover** tab, change settings as follows:
 	- **Maximum failures in the specified period**: 0
 	- **Period (hours)**: 0
 	- **Prevent failback**
@@ -342,48 +342,52 @@ Disabling a VM failover function:
 
 ### Configuring ssh settings
 
-SSH setting is required to allow EC-VM to send commands to host servers.
+SSH is required to allow each EC-VM to send commands to host servers.
 
-On host servers,
+On host servers:
 1. Download OpenSSH-Win64.zip
 	- https://github.com/PowerShell/Win32-OpenSSH/releases
-1. Unzip the file and move OpenSSH-Win folder under *Program Files* folder
+1. Unzip the file and move the OpenSSH-Win64 folder under *Program Files* folder.
 1. Execute **install-sshd.ps1**
-1. Open **Service Manager**, start **Open SSH SSH Server** and change its startup type to **Automatic**
+1. Open **Service Manager**, start the **OpenSSH SSH Server** service, and change its startup type to **Automatic**.
 
-On EC-VMs,
-1. Create ssh key pair
+On EC-VMs:
+1. Create a ssh key pair.
 
 	```
 	# yes no | ssh-keygen -t rsa -f /root/.ssh/id_rsa -N ""
 	```
-1. Copy the public key to host servers
+1. Copy the public key to host servers.    
+    \*TCP port 22 needs to be opened through the host server’s firewall
 
 	```
 	# scp /root/.ssh/id_rsa.pub Administrator@<IP of host 1>:C:\\ProgramData/ssh/<EC-VM hostname>
 	# scp /root/.ssh/id_rsa.pub Administrator@<IP of host 2>:C:\\ProgramData/ssh/<EC-VM hostname>
 	```
 
-On host servers,
+On host servers:
 1. Merge EC-VM's key files into **administrators_authorized_keys**.
 	```
 	> type C:\ProgramData\ssh\ec-vm1 C:\ProgramData\ssh\ec-vm2 > administrators_authorized_keys
+	(e.g. if EC-VM hostnames are ec-vm1 and ec-vm2 respectively)
 	```
-1. Add following lines to **sshd_config** in *C:\ProgramData\ssh*
+1. Add the following lines to **sshd_config** in *C:\ProgramData\ssh*.
 	```
 	PubkeyAuthentication yes
 	PasswordAuthentication no
 	PermitEmptyPasswords yes
 	```
-1. Edit file permission of **administrators_authorized_keys**
-	- Open the property
-	- Click **Advanced** in **Security** tab
-	- Click **Disable inheritance**
-	- Select **Convert inherited permissions into explicit permissions on this object**
-	- Delete **Authenticated Users**
-1. Restart **OpenSSH SSH Server**
+1. Edit file permissions of **administrators_authorized_keys**.
+	- Open the properties dialog of the file.
+	- Click **Advanced** in **Security** tab.
+	- Click **Disable inheritance**.
+	- Select **Convert inherited permissions into explicit permissions on this object**.
+	- Delete **Authenticated Users** from Permission entries.
+1. Restart the **OpenSSH SSH Server** service.
 
-After the above all steps, confirm that EC-VM1 and 2 can connect to both servers by ssh command without typing a password.
+After completing all of the above steps, confirm that EC-VM1 and 2 can connect to both host servers using the ssh command without typing a password.    
+
+e.g.  \# ssh -i .ssh/id_rsa -l \<Administrator account\> \<host IP\>
 
 ----
 
