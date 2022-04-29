@@ -68,12 +68,18 @@ Open **Server Manager** and click **Add roles and features**.
 ### Configuring WSFC
 
 Open **Failover Cluster Manager** and create a WSFC cluster between the host servers. Do not add all eligible storage while running the Create Cluster Wizard. A CSV disk will be added to the cluster later.
-
-_A WSFC installation and configuration guide can be found [here]_(https://docs.microsoft.com/en-us/windows-server/failover-clustering/create-failover-cluster).
+- https://docs.microsoft.com/en-us/windows-server/failover-clustering/create-failover-cluster
 
 Once a cluster is created, in **Networks** setting, disable networks other than Management_network and Mirror_network.
 - Right-click network name and open properties.
 	- Select **Do not allow cluster network communication on this network**.
+
+----
+
+### Set up an ECX Witness Server
+
+The host servers and EC VMs cannot be used for this purpose. Use a separate server, as the diagram indicates.
+- https://docs.nec.co.jp/sites/default/files/minisite/static/8040160a-cffb-4492-ad83-db0cc52fec86/ecx_x43_windows_en/W43_RG_EN/W_RG_07.html#witness-server-service
 
 ----
 
@@ -165,10 +171,12 @@ Once OS installation is finished, do the following on each EC VM:
 	lrwxrwxrwx 1 root root 4 Feb 16 17:24 /dev/cp-diska1 -> sdc1
 	lrwxrwxrwx 1 root root 4 Feb 16 17:04 /dev/cp-diska2 -> sdc2
 	```
-1. Once you complete the above steps on both EC VMs, create an ECX cluster
-If you are not familiar with ECX cluster configuration, you can follow this [guide](EC%20Config.md) to set up the cluster with the required ECX resources. The key ECX resources required with the settings which need to be modified are included below for reference.
-- Witness heartbeat
+1. Once you complete the above steps on both EC VMs, create an ECX cluster    
+    - If you have not done so, first set up a [witness server](https://docs.nec.co.jp/sites/default/files/minisite/static/8040160a-cffb-4492-ad83-db0cc52fec86/ecx_x43_windows_en/W43_RG_EN/W_RG_07.html#witness-server-service).    
+If you are not familiar with ECX cluster configuration, you can follow this [guide](EC%20Config.md) to set up the cluster with the required ECX resources. The key ECX resources required, along with the settings which need to be modified are included below for reference.
 - LAN heartbeat
+- Witness heartbeat
+    - A  needs to be set up before the Witness heartbeat resource can be configured in ECX.
 - HTTP NP
 - Floating IP address
 	- Should belong to the network connecting to iSCSI_switch
