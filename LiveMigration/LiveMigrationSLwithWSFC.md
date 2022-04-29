@@ -278,6 +278,7 @@ You can co-locate it with ECX witness server and configure it as iSCSI target.
 1. Check the disk.
 
 The disk should now be assigned to *Disk Witness in Quorum*.
+
 ----
 
 ### Creating a protected VM in CSV
