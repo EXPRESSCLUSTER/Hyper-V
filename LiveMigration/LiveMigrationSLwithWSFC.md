@@ -166,7 +166,7 @@ Once OS installation is finished, do the following on each EC VM:
 	lrwxrwxrwx 1 root root 4 Feb 16 17:04 /dev/cp-diska2 -> sdc2
 	```
 1. Once you complete the above steps on both EC VMs, create an ECX cluster
-If you are not familiar with ECX cluster configuration, you can follow this guide to set up the cluster with the required ECX resources. The key ECX resources required with the settings which need to be modified are included below for reference.
+If you are not familiar with ECX cluster configuration, you can follow this [guide](EC Config.md) to set up the cluster with the required ECX resources. The key ECX resources required with the settings which need to be modified are included below for reference.
 - Witness heartbeat
 - LAN heartbeat
 - HTTP NP
