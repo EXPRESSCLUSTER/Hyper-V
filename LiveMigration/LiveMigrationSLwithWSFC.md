@@ -328,7 +328,7 @@ Change the quarantine configuration:
 ```
 
 WSFC behavior after executing the above commands:
-- After WSFC detects the other cluster node is isolated, WSFC wait 9999 seconds until it starts recovery action.
+- After WSFC detects the other cluster node is isolated, WSFC waits 9999 seconds until it starts recovery action.
 - WSFC quarantines a cluster node that has been turned off unintentionally 9999 times in a hour.
 
 Disabe the VM failover function:
