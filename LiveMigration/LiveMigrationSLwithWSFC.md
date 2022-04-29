@@ -175,7 +175,7 @@ Once OS installation is finished, do the following on each EC VM:
 If you are not familiar with ECX cluster configuration, you can follow this [guide](EC%20Config.md) to set up the cluster with the required ECX resources. The key ECX resources required, along with the settings which need to be modified are included below for reference.
 - LAN heartbeat
 - Witness heartbeat
-    - Be sure the [Witness Server](#Set up an ECX Witness Server) is already set up.
+    - Be sure the [Witness Server](#Set-up-an-ECX-Witness-Server) is already set up.
 - HTTP NP
 - Floating IP address
 	- Should belong to the network connecting to iSCSI_switch
