@@ -172,11 +172,10 @@ Once OS installation is finished, do the following on each EC VM:
 	lrwxrwxrwx 1 root root 4 Feb 16 17:04 /dev/cp-diska2 -> sdc2
 	```
 1. Once you complete the above steps on both EC VMs, create an ECX cluster    
-    - If you have not done so, first set up a [witness server](https://docs.nec.co.jp/sites/default/files/minisite/static/8040160a-cffb-4492-ad83-db0cc52fec86/ecx_x43_windows_en/W43_RG_EN/W_RG_07.html#witness-server-service).    
 If you are not familiar with ECX cluster configuration, you can follow this [guide](EC%20Config.md) to set up the cluster with the required ECX resources. The key ECX resources required, along with the settings which need to be modified are included below for reference.
 - LAN heartbeat
 - Witness heartbeat
-    - A  needs to be set up before the Witness heartbeat resource can be configured in ECX.
+    - Be sure the [Witness Server](#Set up an ECX Witness Server) is already set up.
 - HTTP NP
 - Floating IP address
 	- Should belong to the network connecting to iSCSI_switch
