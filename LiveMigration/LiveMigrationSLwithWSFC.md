@@ -358,7 +358,7 @@ On EC-VMs:
 	# yes no | ssh-keygen -t rsa -f /root/.ssh/id_rsa -N ""
 	```
 1. Copy the public key to host servers.    
-    \*TCP port 22 needs to be opened through the host server’s firewall
+    \*TCP port 22 needs to be opened through the host server’s firewall.
 
 	```
 	# scp /root/.ssh/id_rsa.pub Administrator@<IP of host 1>:C:\\ProgramData/ssh/<EC-VM hostname>
