@@ -180,14 +180,14 @@ If you are not familiar with ECX cluster configuration, you can follow this [gui
 - Floating IP address
 	- Should belong to the network connecting to iSCSI_switch
 - Mirror disk
+	- File System: none
 	- Data Partition Device Name: /dev/cp-diska2
 	- Cluster Partition Device Name: /dev/cp-diska1
-	- File System: none
-- Exec
+- EXEC
 	- e.g. Resource name is *exec-iscsi*
-	- Should depend on a Floating IP address and Mirror disk
-		- Add Floating IP address and Mirror disk in **Dependency** tab.
-	- Replace scripts with new scripts below.
+	- Should depend on the Floating IP resource and Mirror disk resource.
+		- Add Floating IP and Mirror disk resources in the **Dependency** tab.
+	- Replace scripts with new scripts below:
 
 		*start.sh*
 		```
@@ -210,8 +210,8 @@ If you are not familiar with ECX cluster configuration, you can follow this [gui
 
 ### Configuring iSCSI target
 
-1. Confirm that a failover group is running on EC-VM1
-1. Configure NMP1 as a target disk
+1. Confirm that the failover group is running on EC-VM1.
+1. Configure NMP1 as a target disk.
 
 	```
 	systemctl start target
@@ -225,36 +225,36 @@ If you are not familiar with ECX cluster configuration, you can follow this [gui
 
 	# Allow Host 1 and 2 (*IQN of iSCSI Initiator*) to scan the iSCSI target
 
-	targetcli /iscsi/iqn.1996-10.com.ecx/tpg1/acls create $IQN1
-	targetcli /iscsi/iqn.1996-10.com.ecx/tpg1/acls create $IQN2
+	targetcli /iscsi/iqn.1996-10.com.ecx/tpg1/acls create $Host1IQN
+	targetcli /iscsi/iqn.1996-10.com.ecx/tpg1/acls create $Host2IQN
 
 	# Save the configuration
 	targetcli saveconfig
 	```
 
-	You can check IQN on **iSCSI Initiator** Configuration tab on each host server.
-1. Move a failover group to EC-VM2 and configure as same.
-1. Move a failover group to EC-VM1
+	\*You can get the IQN from the **iSCSI Initiator**'s Configuration tab on each host server.
+1. Move the failover group to EC-VM2 and configure the same as EC-VM1.
+1. Move the failover group back to EC-VM1.
 
 ----
 
 ### Connecting to iSCSI target from host servers
 
-1. Open **iSCSI Initiator**
-1. In **Targets** tab, type the floating IP address and click **Quick Connect**
-1. Select the target and click **Connect**
+1. Open the **iSCSI Initiator** on each host server.
+1. In the **Targets** tab, type the floating IP address and click **Quick Connect**.
+1. Select the target and click **Connect**.
 
-This disk will be configured as WSFC cluster shared volume from next steps.
+This disk will be configured as a WSFC cluster shared volume in the next steps.
 
 ----
 
 ### Configuring CSV
 
-1. Open **Disk Management** on either host server
-1. Configure the disk as NTFS
-1. Open **Disk Management** on another host server, and make it online.
-1. Open **Failover Cluster Manager**
-1. In **Disks** page, add the disk and set it as cluster shared volume.
+1. Open **Disk Management** on either host server.
+1. Bring the new disk online, initialize it, and format it as NTFS.
+1. Open **Disk Management** on the other host server, and bring the new disk online.
+1. Open **Failover Cluster Manager**.
+1. In **Storage > Disks** page, Add the disk and then *Add to Cluster Shared Volumes*.
 
 ----
 
@@ -267,16 +267,17 @@ A quorum disk size should be larger than 512MB.
 
 You can co-locate it with ECX witness server and configure it as iSCSI target.
 
-1. Open **Disk Management** on either host server
-1. Configure the disk as NTFS
-1. Open **Disk Management** on another host server, and make it online.
-1. Open **Failover Cluster Manager**
-1. In **Disks** page, add the disk.
-1. In cluster summary page, select **Configure Cluster Quorum Settings** in **More Actions**
-1. **Select the quorum witness**
-1. **Configure a disk witness**
-1. Check the disk
+1. Open **Disk Management** on either host server.
+1. Bring the new disk online, initiialize it, and format it as NTFS.
+1. Open **Disk Management** on the other host server, and bring the new disk online.
+1. Open **Failover Cluster Manager**.
+1. In **Storage > Disks** page, Add the disk.
+1. Switch to the cluster summary page and select **Configure Cluster Quorum Settings** in **More Actions**.
+1. **Select the quorum witness**.
+1. **Configure a disk witness**.
+1. Check the disk.
 
+The disk should now be assigned to *Disk Witness in Quorum*.
 ----
 
 ### Creating a protected VM in CSV
