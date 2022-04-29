@@ -393,7 +393,7 @@ e.g.  \# ssh -i .ssh/id_rsa -l \<Administrator account\> \<host IP\>
 
 ### Adding EXEC resources to control a VM and live migration
 
-1. Downloading scripts from GitHub repository
+1. Download [scripts](scripts) from GitHub repository
 1. Adding to a EXEC resource to control a VM
 	- e.g. Resource name is *exec-VMNAME*
 	- Depends on *exec-iscsi*
