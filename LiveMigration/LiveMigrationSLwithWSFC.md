@@ -284,7 +284,7 @@ The disk should now be assigned to *Disk Witness in Quorum*.
 ### Creating a protected VM in CSV
 
 In the case you created a new VM
-- In Failover Cluster Manager's **Roles** page, select **New Virtual Machine** in **Virtual Machines**.
+- In Failover Cluster Manager's **Roles** page, select **New Virtual Machine** in **Virtual Machines**.    
     \*Be sure to set the VM and VHDX locations to the cluster storage volume.
 
 In the case that you import an existing VM into Failover Cluster Manager
