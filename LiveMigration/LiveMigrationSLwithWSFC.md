@@ -394,16 +394,16 @@ e.g.  \# ssh -i .ssh/id_rsa -l \<Administrator account\> \<host IP\>
 ### Adding EXEC resources to control a VM and live migration
 
 1. Download [scripts](scripts) from GitHub repository
-1. Adding to a EXEC resource to control a VM
+1. Add an EXEC resource to control a VM in Cluster WebUI.
 	- e.g. Resource name is *exec-VMNAME*
 	- Depends on *exec-iscsi*
 	- Replacing *start.sh* with *vm-start.pl*
 	- Editing **Configuration** section in the start script.
 	- Replacing *stop.sh* with *vm-unregister.pl*
-	- Editing **Configuration** section in the stop script.
-	- **Log Output Path** in **Tuning** page is */opt/nec/clusterpro/log/exec-VMNAME.log*
-	- Checking *Rotate Log* in **Tuning** page
-1. Applying the cluster configuration
+	- Edit the **Configuration** section in the stop script.
+	- Set **Log Output Path** in **Tuning** page, **Maintenance** tab, to */opt/nec/clusterpro/log/exec-VMNAME.log*
+	- Check *Rotate Log* on **Maintenance** tab.
+1. Apply the cluster configuration
 
 ----
 
@@ -411,18 +411,18 @@ e.g.  \# ssh -i .ssh/id_rsa -l \<Administrator account\> \<host IP\>
 
 One custom monitor resource is needed per VM, and one is needed per cluster.
 
-1. Adding to a custom monitor resource to monitor a VM
+1. Add a custom monitor resource to monitor a VM in Cluster WebUI
 	- e.g. Monitor name is *genw-VMNAME*
 	- **Retry Count** is 1
-	- Monitor timing is when *exec-VMNAME* is active
+	- Monitor timing is when *exec-VMNAME* is active.
 	- Replacing *genw.sh* with *genw-vm.pl*
 	- Editing **Configuration** section in the monitor script
 	- **Log Output Path** is */opt/nec/clusterpro/log/genw-VMNAME.log*
 	- Checking **Rotate Log**
 	- **Normal Return Value** is 0
 	- **Recovery Action** is **Executing failover to the recovery target**
-	- **Recovery Target** is the failover group that includes the VM
-1. Adding to a custom monitor resource to monitor an opposite EC-VM
+	- **Recovery Target** is the failover group that includes the VM.
+1. Add a custom monitor resource to monitor the standby EC-VM
 	- e.g. Monitor name is *genw-remote-node*
 	- Monitor timing is when the md resource is active
 	- Replacing *genw.sh* with *genw-remote-node.pl*
@@ -433,10 +433,11 @@ One custom monitor resource is needed per VM, and one is needed per cluster.
 	- **Recovery Action** is **Custom settings**
 	- **Recovery Target** is **LocalServer**
 	- **Final Action** is **No operation**
+1. Apply the custom configuration file.
 
 ----
 
-## How to operate a cluster
+## Script details
 
 *exec-VMNAME*
 - When it starts, VM is registered on Hyper-V Manager and powered on.
@@ -449,12 +450,14 @@ One custom monitor resource is needed per VM, and one is needed per cluster.
 - Starting ECX cluster if it is not running on the opposite EC-VM.
 - Powering on the opposite EC-VM if it is not running.
 
+## How to operate a cluster
+
 How to execute Live Migration:
 - In case that an user moves a failover group manually and a VM is running on a source server, Live Migration is executed without stopping the VM.
 
 How to stop the VM to change its property:
 - Suspend *genw-VMNAME*.
-- Please note that VM should be powered on after changing its property and before resuming *genw-VMNAME*.
+- Please note that the VM should be powered on after changing its property and before resuming *genw-VMNAME*.
 
 ## Testing
 
