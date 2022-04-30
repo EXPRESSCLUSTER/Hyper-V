@@ -265,7 +265,7 @@ A shared disk that is accessible from both hosts is needed outside host servers.
 A quorum disk size should be larger than 512MB.
 - https://docs.microsoft.com/en-us/windows-server/failover-clustering/manage-cluster-quorum
 
-You can co-locate it with ECX witness server and configure it as iSCSI target.
+You can co-locate the disk on the ECX witness server and configure it as an iSCSI target.
 
 1. Open **Disk Management** on either host server.
 1. Bring the new disk online, initiialize it, and format it as NTFS.
@@ -329,7 +329,7 @@ Change the quarantine configuration:
 
 WSFC behavior after executing the above commands:
 - After WSFC detects the other cluster node is isolated, WSFC waits 9999 seconds until it starts recovery action.
-- WSFC quarantines a cluster node that has been turned off unintentionally 9999 times in a hour.
+- WSFC quarantines a cluster node that has been turned off unintentionally 9999 times in an hour.
 
 Disabe the VM failover function:
 1. Open VM property in **Failover Cluster Manager**.
@@ -397,13 +397,13 @@ e.g.  \# ssh -i .ssh/id_rsa -l \<Administrator account\> \<host IP\>
 1. Add an EXEC resource to control a VM in Cluster WebUI.
 	- e.g. Resource name is *exec-VMNAME*
 	- Depends on *exec-iscsi*
-	- Replacing *start.sh* with *vm-start.pl*
-	- Editing **Configuration** section in the start script.
-	- Replacing *stop.sh* with *vm-unregister.pl*
-	- Edit the **Configuration** section in the stop script.
+	- Replace *start.sh* with *vm-start.pl*
+	- Edit the **Configuration** section in the start script to match your environment.
+	- Replace *stop.sh* with *vm-stop.pl*
+	- Edit the **Configuration** section in the stop script to match your environment.
 	- Set **Log Output Path** in **Tuning** page, **Maintenance** tab, to */opt/nec/clusterpro/log/exec-VMNAME.log*
 	- Check *Rotate Log* on **Maintenance** tab.
-1. Apply the cluster configuration
+1. **Apply the Configuration File**.
 
 ----
 
@@ -415,45 +415,45 @@ One custom monitor resource is needed per VM, and one is needed per cluster.
 	- e.g. Monitor name is *genw-VMNAME*
 	- **Retry Count** is 1
 	- Monitor timing is when *exec-VMNAME* is active.
-	- Replacing *genw.sh* with *genw-vm.pl*
-	- Editing **Configuration** section in the monitor script
+	- Replace *genw.sh* with *genw-vm.pl*
+	- Edit the **Configuration** section in the monitor script to match your environment.
 	- **Log Output Path** is */opt/nec/clusterpro/log/genw-VMNAME.log*
-	- Checking **Rotate Log**
+	- Check **Rotate Log**
 	- **Normal Return Value** is 0
 	- **Recovery Action** is **Executing failover to the recovery target**
 	- **Recovery Target** is the failover group that includes the VM.
 1. Add a custom monitor resource to monitor the standby EC-VM
 	- e.g. Monitor name is *genw-remote-node*
 	- Monitor timing is when the md resource is active
-	- Replacing *genw.sh* with *genw-remote-node.pl*
-	- Editing **Configuration** section in the monitor script
+	- Replace *genw.sh* with *genw-remote-node.pl*
+	- Edit the **Configuration** section in the monitor script to match your environment.
 	- **Log Output Path** is */opt/nec/clusterpro/log/genw-remote-node.log*
-	- Checking **Rotate Log**
+	- Check **Rotate Log**
 	- **Normal Return Value** is 0
 	- **Recovery Action** is **Custom settings**
 	- **Recovery Target** is **LocalServer**
 	- **Final Action** is **No operation**
-1. Apply the custom configuration file.
+1. **Apply the Configuration File**.
 
 ----
 
 ## Script details
 
 *exec-VMNAME*
-- When it starts, VM is registered on Hyper-V Manager and powered on.
-- When it stops, VM is unregistered on Hyper-V Manager and powered off.
+- When it starts, the VM is registered on Hyper-V Manager and powered on.
+- When it stops, the VM is unregistered on Hyper-V Manager and powered off.
 
 *genw-VMNAME*
-- Executing the recovery action if VM is not running on its host server.
+- Executes the recovery action if the VM is not running on its host server.
 
 *genw-remote-node*
-- Starting ECX cluster if it is not running on the opposite EC-VM.
-- Powering on the opposite EC-VM if it is not running.
+- Starts the ECX cluster if it is not running on the standby EC-VM.
+- Powers on the standby EC-VM if it is not running.
 
 ## How to operate a cluster
 
 How to execute Live Migration:
-- In case that an user moves a failover group manually and a VM is running on a source server, Live Migration is executed without stopping the VM.
+- In the case that a user moves a failover group manually and a VM is running on the source server, Live Migration is executed without stopping the VM.
 
 How to stop the VM to change its property:
 - Suspend *genw-VMNAME*.
