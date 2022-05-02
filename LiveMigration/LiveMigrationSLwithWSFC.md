@@ -178,7 +178,7 @@ If you are not familiar with ECX cluster configuration, you can follow this [gui
     - Be sure the [Witness Server](#Set-up-an-ECX-Witness-Server) is already set up.
 - HTTP NP
 - Floating IP address
-	- Should belong to the network connecting to iSCSI_switch
+	- Should belong to the network connecting to iSCSI_switch.
 - Mirror disk
 	- File System: none
 	- Data Partition Device Name: /dev/cp-diska2
@@ -348,7 +348,7 @@ On host servers:
 1. Download OpenSSH-Win64.zip
 	- https://github.com/PowerShell/Win32-OpenSSH/releases
 1. Unzip the file and move the OpenSSH-Win64 folder under *Program Files* folder.
-1. Execute **install-sshd.ps1**
+1. Execute **install-sshd.ps1**.
 1. Open **Service Manager**, start the **OpenSSH SSH Server** service, and change its startup type to **Automatic**.
 
 On EC-VMs:
@@ -393,15 +393,15 @@ e.g.  \# ssh -i .ssh/id_rsa -l \<Administrator account\> \<host IP\>
 
 ### Adding EXEC resources to control a VM and live migration
 
-1. Download [scripts](scripts) from GitHub repository
+1. Download [scripts](scripts) from GitHub repository.
 1. Add an EXEC resource to control a VM in Cluster WebUI.
 	- e.g. Resource name is *exec-VMNAME*
-	- Depends on *exec-iscsi*
-	- Replace *start.sh* with *vm-start.pl*
+	- Depends on *exec-iscsi*.
+	- Replace *start.sh* with *vm-start.pl*.
 	- Edit the **Configuration** section in the start script to match your environment.
-	- Replace *stop.sh* with *vm-stop.pl*
+	- Replace *stop.sh* with *vm-stop.pl*.
 	- Edit the **Configuration** section in the stop script to match your environment.
-	- Set **Log Output Path** in **Tuning** page, **Maintenance** tab, to */opt/nec/clusterpro/log/exec-VMNAME.log*
+	- Set **Log Output Path** in **Tuning** page, **Maintenance** tab, to */opt/nec/clusterpro/log/exec-VMNAME.log*.
 	- Check *Rotate Log* on **Maintenance** tab.
 1. **Apply the Configuration File**.
 
@@ -413,26 +413,26 @@ One custom monitor resource is needed per VM, and one is needed per cluster.
 
 1. Add a custom monitor resource to monitor a VM in Cluster WebUI
 	- e.g. Monitor name is *genw-VMNAME*
-	- **Retry Count** is 1
+	- **Retry Count** is 1.
 	- Monitor timing is when *exec-VMNAME* is active.
-	- Replace *genw.sh* with *genw-vm.pl*
+	- Replace *genw.sh* with *genw-vm.pl*.
 	- Edit the **Configuration** section in the monitor script to match your environment.
-	- **Log Output Path** is */opt/nec/clusterpro/log/genw-VMNAME.log*
-	- Check **Rotate Log**
-	- **Normal Return Value** is 0
-	- **Recovery Action** is **Executing failover to the recovery target**
+	- **Log Output Path** is */opt/nec/clusterpro/log/genw-VMNAME.log*.
+	- Check **Rotate Log**.
+	- **Normal Return Value** is 0.
+	- **Recovery Action** is **Executing failover to the recovery target**.
 	- **Recovery Target** is the failover group that includes the VM.
 1. Add a custom monitor resource to monitor the standby EC-VM
 	- e.g. Monitor name is *genw-remote-node*
-	- Monitor timing is when the md resource is active
-	- Replace *genw.sh* with *genw-remote-node.pl*
+	- Monitor timing is when the md resource is active.
+	- Replace *genw.sh* with *genw-remote-node.pl*.
 	- Edit the **Configuration** section in the monitor script to match your environment.
-	- **Log Output Path** is */opt/nec/clusterpro/log/genw-remote-node.log*
-	- Check **Rotate Log**
-	- **Normal Return Value** is 0
-	- **Recovery Action** is **Custom settings**
-	- **Recovery Target** is **LocalServer**
-	- **Final Action** is **No operation**
+	- **Log Output Path** is */opt/nec/clusterpro/log/genw-remote-node.log*.
+	- Check **Rotate Log**.
+	- **Normal Return Value** is 0.
+	- **Recovery Action** is **Custom settings**.
+	- **Recovery Target** is **LocalServer**.
+	- **Final Action** is **No operation**.
 1. **Apply the Configuration File**.
 
 ----
