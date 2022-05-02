@@ -4,7 +4,7 @@
 
 WSFC has a quarantine function to isolate a cluster node that has crashed a certain number of times for a certain period. If you followed the setup document, the quarantine threshold would have been extended to 9999 times.
 
-Although with this settings, if your server would be quarantined, you can release the quarantined server with the following command.
+Even with this setting, your server might still be quarantined. If that happens, you can release the quarantined server with the following command:
 
 ```
 > Start-ClusterNode -ClearQuarantine
@@ -14,29 +14,29 @@ Although with this settings, if your server would be quarantined, you can releas
 
 Move a failover group.
 1. From ec1 to ec2.
-    - Live migration is executed without stopping a VM.
+    - Live migration is executed without stopping the VM.
 1. From ec2 to ec1.
-    - Live migration is executed without stopping a VM.
+    - Live migration is executed without stopping the VM.
        
 Start/Stop a failover group
-1. A failover group is running on ec1.
-1. Stop a failover group.
+1. The failover group is running on ec1.
+1. Stop the failover group.
     - VM is stopped.
-1. Start a failover group on ec1.
+1. Start the failover group on ec1.
     - VM is started.
-1. Stop a failover group.
+1. Stop the failover group.
     - VM is stopped.
-1. Start a failover group on ec2.
-	- Quick migration is executed then VM is started.
+1. Start the failover group on ec2.
+	- Quick migration is executed and then VM is started.
 
 ## Power off
 
 Host server shutdown
-- Power off host 1 > Wait for completion of the failover
-- Power on host 1 > Wait for completion of the mirror-recovery
-- Power off host 2 > Wait for completion of the failover
-- Power on host 2 > Wait for completion of the mirror-recovery
-- Power off host 1 and 2 > Power on host 1 and 2 > (If the md is in incosistent state, you need to execute data copy in WebUI Mirror disks tab.) > Wait for completion of starting the target VM
+- Power off host 1 > Wait for completion of the failover.
+- Power on host 1 > Wait for completion of the mirror-recovery.
+- Power off host 2 > Wait for completion of the failover.
+- Power on host 2 > Wait for completion of the mirror-recovery.
+- Power off host 1 and 2 > Power on host 1 and 2 > (If the md is in an inconsistent state, you need to execute data copy in WebUI Mirror disks tab.) > Wait for the target VM to complete startup.
 
 EC VM shutdown
 - Same result as Power off test.
@@ -46,7 +46,7 @@ EC VM shutdown
 
 ## Appendix
 
-### Powershell commands to check a cluster component status.
+### Powershell commands to check a cluster component's status
 
 WSFC node status
 ```
@@ -79,11 +79,11 @@ Virtual Machine Cent8.2-1               Online Cent8.2-1     Virtual Machine
 Virtual Machine Cluster WMI             Online Cluster Group Virtual Machine Cluster WMI
 Virtual Machine Configuration Cent8.2-1 Online Cent8.2-1     Virtual Machine Configuration
 ```
-*exec-VMNAME-register* starts or stops *Virtual Machine Configuration VMNAME*.
+*exec-VMNAME* starts or stops *Virtual Machine Configuration VMNAME*.
 
-While *Virtual Machine Configuration VMNAME* is online, a VM is listed on Hyper-V Manager.
+When *Virtual Machine Configuration VMNAME* is online, the VM is listed in Hyper-V Manager.
 
-While it is offline, a VM is not visible on Hyper-V Manager.
+When it is offline, the VM is not visible in Hyper-V Manager.
 
 ---
 Cluster group status
@@ -96,9 +96,9 @@ Available Storage ws2019-host-2 Offline
 Cent8.2-1         ws2019-host-2 Online
 Cluster Group     ws2019-host-2 Online
 ```
-A cluster group *VMNAME* is created automatically when a VM is added to WSFC cluster.
+A cluster group *VMNAME* is created automatically when a VM is added to the WSFC cluster.
 
-*VMNAME* group is composed of multiple resources, but its state equals to whether a VM is running or not.
+*VMNAME* group is composed of multiple resources, but its state shows whether the VM is running or not.
 
 ---
 Powershell command help
@@ -133,6 +133,11 @@ Mode                LastWriteTime         Length Name
 
 PS C:\Users\Administrator.2016DOM\Downloads>
 ```
-*Destination* option specifies a location where log files are saved.
+*Destination* option specifies the location where log files are saved.
 
 *Timespan* option specifies a time period covered by the logs. The above sample command covers the last 10080 minutes (equivalent to 1 week).
+
+---
+## Troubleshooting
+
+See [Addendum](Addendum.md)
