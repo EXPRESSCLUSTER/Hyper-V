@@ -52,4 +52,4 @@ If you need to dig deeper, examine the WSFC log files for the following entry:
 
 ExpressCluster log files may also provide clues.
   
-**Solution:** Increase memory on host machine or increase CPUs.
+**SOLUTION:** Increase memory on host machine or increase CPUs.
