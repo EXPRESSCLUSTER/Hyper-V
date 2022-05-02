@@ -10,7 +10,7 @@ The cause may be insufficient CPUs or memory on the host machine. The guest VM m
 
 **Troubleshooting**    
 
-If you are lucky, the error messages will be obvious:    
+If you are lucky, the error messages will be obvious.    
 
 1. Hyper-V Manager might display something like the following by the guest VM:    
 
@@ -38,7 +38,7 @@ If you are lucky, the error messages will be obvious:
 
         '<guest vm>' could not initialize memory: Ran out of memory (0x80070000E). (Virtual machine ID 20830CED-0629-4CC2-9AD9-21F6E87E3BE1)    
 
-3. Get-ClusterResource might have the following output    
+3. Get-ClusterResource might have the following output:    
 
         Get-ClusterResource
         
