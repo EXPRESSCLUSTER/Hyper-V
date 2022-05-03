@@ -10,7 +10,7 @@ The cause may be insufficient CPUs or memory on the host machine. The guest VM m
 
 **Troubleshooting**    
 
-If you are lucky, the error messages will be obvious:    
+If you are lucky, the error messages will be obvious.    
 
 1. Hyper-V Manager might display something like the following by the guest VM:    
 
@@ -24,21 +24,21 @@ If you are lucky, the error messages will be obvious:
 
 2. Guest VM connection window might display the following error:    
     
-        The application encountered an error while attempting to change the state of 'TESTVM'.
+        The application encountered an error while attempting to change the state of '<guest vm>'.
 
         '<guest vm>' failed to start.
 
-        Not enough memory in the system to start the virtual machine TESTVM.
+        Not enough memory in the system to start the virtual machine <guest vm>.
 
         Could not initialize memory: Ran out of memory (0x80070000E).
 
         '<guest vm>' failed to start. (Virtual machine ID 20830CED-0629-4CC2-9AD9-21F6E87E3BE1)
 
-        Not enough memory in the system to start the virtual machine TESTVM with ram size 2048 megabytes. (Virtual machine ID 20830CED-0629-4CC2-9AD9-21F6E87E3BE1)
+        Not enough memory in the system to start the virtual machine <guest vm> with ram size 2048 megabytes. (Virtual machine ID 20830CED-0629-4CC2-9AD9-21F6E87E3BE1)
 
         '<guest vm>' could not initialize memory: Ran out of memory (0x80070000E). (Virtual machine ID 20830CED-0629-4CC2-9AD9-21F6E87E3BE1)    
 
-3. Get-ClusterResource might have the following output    
+3. Get-ClusterResource might have the following output:    
 
         Get-ClusterResource
         
@@ -52,4 +52,4 @@ If you need to dig deeper, examine the WSFC log files for the following entry:
 
 ExpressCluster log files may also provide clues.
   
-**Solution:** Increase memory on host machine or increase CPUs
+**SOLUTION:** Increase memory on host machine or increase CPUs.

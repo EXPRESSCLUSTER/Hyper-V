@@ -50,41 +50,42 @@ After completing Hyper-V installation, configure Hyper-V settings in Hyper-V Man
 
 ### Host server settings
 
-- Open network adapter settings and set IP address to each vEthernet.
-- Join servers to a domain and configure a firewall of the domain.
+- Open network adapter settings and set an IP address for each vEthernet adapter.
+- Join servers to a domain and configure the firewall of the domain.
 - Login to the domain account.
 
-Subsequent procedures should be operated by the domain account.
+Subsequent procedures should be performed using the domain account.
 
 ----
 
 ### Installing WSFC
 
 Open **Server Manager** and click **Add roles and features**.
-- Check **Failover Clustering** as **Features**
+- Check **Failover Clustering** under **Features** and follow the wizard to install it.
 
 ----
 
 ### Configuring WSFC
 
-First, open **Failover Cluster Manager** and create a WSFC cluster.
+Open **Failover Cluster Manager** and create a WSFC cluster between the host servers. Do not add all eligible storage while running the Create Cluster Wizard. A CSV disk will be added to the cluster later.
+- https://docs.microsoft.com/en-us/windows-server/failover-clustering/create-failover-cluster
 
-Once created a cluster, in **Networks** setting, disable networks other than Management_network and Mirror_network.
-- Right-click network name and open the property.
-	- Select **Do not allow cluster network communication on this network**
+Once a cluster is created, in **Networks** setting, disable networks other than Management_network and Mirror_network.
+- Right-click network name and open properties.
+	- Select **Do not allow cluster network communication on this network**.
+
+----
+
+### Set up an ECX Witness Server
+
+The host servers and EC VMs cannot be used for this purpose. Use a separate server, as the diagram indicates.
+- https://docs.nec.co.jp/sites/default/files/minisite/static/8040160a-cffb-4492-ad83-db0cc52fec86/ecx_x43_windows_en/W43_RG_EN/W_RG_07.html#witness-server-service
 
 ----
 
 ### Setting up iSCSI target VM (EC-VM1 and EC-VM2 in the diagram)
 
-Open **Hyper-V Manager** and create a new VM.
-
-After creating EC-VMs, change the VM settings as follows:
-- **Automatic Start Action**
-	- **Always start this virtual machine automatically**
-	- **Startup delay**: 5 seconds
-- **Automatic Stop Action**
-	- **Shut down the guest operating system**
+Open **Hyper-V Manager** on each host machine and create a new VM.
 
 #### EC-VM's spec
 - CentOS Linux release 8.2.2004 (Core)
@@ -94,7 +95,14 @@ After creating EC-VMs, change the VM settings as follows:
 - 3 NICs
 - 2 HDDs, 30GB for OS and 25GB for mirror disk
 
-Once OS installation finished, do as follows.
+After creating EC-VMs, change the VM settings as follows (stop them first!):
+- **Automatic Start Action**
+	- **Always start this virtual machine automatically**
+	- **Startup delay**: 5 seconds
+- **Automatic Stop Action**
+	- **Shut down the guest operating system**
+
+Once OS installation is finished, do the following on each EC VM:
 1. Disable firewalld
 	```
 	# systemctl disable firewalld
@@ -120,22 +128,22 @@ Once OS installation finished, do as follows.
 	# systemctl disable target
 	# systemctl stop target
 	```
-1. Configure a disk for ECX mirror disk
-	1. Create partitions for ECX cluster partition and ECX data partition.
+1. Configure a disk for ECX mirroring
+	1. Create an ECX cluster partition and ECX data partition.
 		
-		e.g. In case of using /dev/sdb for ECX mirror disk.
+		e.g. In the case /dev/sdb is used for the ECX mirror disk.
 		```
 		# parted -s /dev/sdb mklabel msdos mkpart primary 0% 1025MiB mkpart primary 1025MiB 100%
 		```
-1. Configure a symbolic link of the disk device
+1. Configure a symbolic link for the disk device
 
-	On Linux machine, names of disk devices may change sometimes because Linux OS determines device names in the order in which they are recognized.
+	On a Linux machine, names of disk devices may change sometimes because the Linux OS determines device names in the order in which they are recognized after startup.
 
-	By creating a symbolic link of the disk device, you can use an unique name even if the device name were changed.
+	By creating a symbolic link for the disk device, you can use a static unique name to reference the disk, even if the device name is changed.
 
 	1. Check disk IDs
 
-		e.g. In case of using /dev/sdb for ECX mirror disk.
+		e.g. In the case /dev/sdb is used for the ECX mirror disk (with sample output).
 		```
 		# /lib/udev/scsi_id --whitelisted --device=/dev/sdb
 		3600224804fb4d824c64c0f4156f86fc9
@@ -149,9 +157,12 @@ Once OS installation finished, do as follows.
 		KERNEL=="sd*[^0-9]",ENV{ID_SERIAL}=="",IMPORT{parent}=="ID_*"
 		ENV{ID_SERIAL}=="3600224804fb4d824c64c0f4156f86fc9",SYMLINK+="cp-diska%n"
 		```
-		You need to edit only *3600224804fb4d824c64c0f4156f86fc9* depending on your environment.
+		You only need to edit *3600224804fb4d824c64c0f4156f86fc9* depending on your environment.
 
 1. Install ECX
+    rpm -ivh expresscls*.rpm
+1. Register ECX license files
+    clplcnsc -i ECX*.key
 1. Reboot OS
 1. Confirm that the symbolic link is enabled.
 	```
@@ -160,23 +171,23 @@ Once OS installation finished, do as follows.
 	lrwxrwxrwx 1 root root 4 Feb 16 17:24 /dev/cp-diska1 -> sdc1
 	lrwxrwxrwx 1 root root 4 Feb 16 17:04 /dev/cp-diska2 -> sdc2
 	```
-1. Once you complete the above steps on both VMs, create a ECX cluster
-
-At this point, required ECX resources are
-- Witness heartbeat
+1. Once you complete the above steps on both EC VMs, create an ECX cluster    
+If you are not familiar with ECX cluster configuration, you can follow this [guide](EC%20Config.md) to set up the cluster with the required ECX resources. The key ECX resources required, along with the settings which need to be modified are included below for reference.
 - LAN heartbeat
+- Witness heartbeat
+    - Be sure the [Witness Server](#Set-up-an-ECX-Witness-Server) is already set up.
 - HTTP NP
 - Floating IP address
-	- Should belong to the network connecting to iSCSI_switch
+	- Should belong to the network connecting to iSCSI_switch.
 - Mirror disk
+	- File System: none
 	- Data Partition Device Name: /dev/cp-diska2
 	- Cluster Partition Device Name: /dev/cp-diska1
-	- File System: none
-- Exec
+- EXEC
 	- e.g. Resource name is *exec-iscsi*
-	- Should depend on a Floating IP address and Mirror disk
-		- Add Floating IP address and Mirror disk in **Dependency** tab.
-	- Replace scripts with new scripts below.
+	- Should depend on the Floating IP resource and Mirror disk resource.
+		- Add Floating IP and Mirror disk resources in the **Dependency** tab.
+	- Replace scripts with new scripts below:
 
 		*start.sh*
 		```
@@ -199,8 +210,8 @@ At this point, required ECX resources are
 
 ### Configuring iSCSI target
 
-1. Confirm that a failover group is running on EC-VM1
-1. Configure NMP1 as a target disk
+1. Confirm that the failover group is running on EC-VM1.
+1. Configure NMP1 as a target disk.
 
 	```
 	systemctl start target
@@ -214,36 +225,36 @@ At this point, required ECX resources are
 
 	# Allow Host 1 and 2 (*IQN of iSCSI Initiator*) to scan the iSCSI target
 
-	targetcli /iscsi/iqn.1996-10.com.ecx/tpg1/acls create $IQN1
-	targetcli /iscsi/iqn.1996-10.com.ecx/tpg1/acls create $IQN2
+	targetcli /iscsi/iqn.1996-10.com.ecx/tpg1/acls create $Host1IQN
+	targetcli /iscsi/iqn.1996-10.com.ecx/tpg1/acls create $Host2IQN
 
 	# Save the configuration
 	targetcli saveconfig
 	```
 
-	You can check IQN on **iSCSI Initiator** Configuration tab on each host server.
-1. Move a failover group to EC-VM2 and configure as same.
-1. Move a failover group to EC-VM1
+	\*You can get the IQN from the **iSCSI Initiator**'s Configuration tab on each host server.
+1. Move the failover group to EC-VM2 and configure the same as EC-VM1.
+1. Move the failover group back to EC-VM1.
 
 ----
 
 ### Connecting to iSCSI target from host servers
 
-1. Open **iSCSI Initiator**
-1. In **Targets** tab, type the floating IP address and click **Quick Connect**
-1. Select the target and click **Connect**
+1. Open the **iSCSI Initiator** on each host server.
+1. In the **Targets** tab, type the floating IP address and click **Quick Connect**.
+1. Select the target and click **Connect**.
 
-This disk will be configured as WSFC cluster shared volume from next steps.
+This disk will be configured as a WSFC cluster shared volume in the next steps.
 
 ----
 
 ### Configuring CSV
 
-1. Open **Disk Management** on either host server
-1. Configure the disk as NTFS
-1. Open **Disk Management** on another host server, and make it online.
-1. Open **Failover Cluster Manager**
-1. In **Disks** page, add the disk and set it as cluster shared volume.
+1. Open **Disk Management** on either host server.
+1. Bring the new disk online, initialize it, and format it as NTFS.
+1. Open **Disk Management** on the other host server, and bring the new disk online.
+1. Open **Failover Cluster Manager**.
+1. In **Storage > Disks** page, Add the disk and then *Add to Cluster Shared Volumes*.
 
 ----
 
@@ -254,30 +265,33 @@ A shared disk that is accessible from both hosts is needed outside host servers.
 A quorum disk size should be larger than 512MB.
 - https://docs.microsoft.com/en-us/windows-server/failover-clustering/manage-cluster-quorum
 
-You can co-locate it with ECX witness server and configure it as iSCSI target.
+You can co-locate the disk on the ECX witness server and configure it as an iSCSI target.
 
-1. Open **Disk Management** on either host server
-1. Configure the disk as NTFS
-1. Open **Disk Management** on another host server, and make it online.
-1. Open **Failover Cluster Manager**
-1. In **Disks** page, add the disk.
-1. In cluster summary page, select **Configure Cluster Quorum Settings** in **More Actions**
-1. **Select the quorum witness**
-1. **Configure a disk witness**
-1. Check the disk
+1. Open **Disk Management** on either host server.
+1. Bring the new disk online, initiialize it, and format it as NTFS.
+1. Open **Disk Management** on the other host server, and bring the new disk online.
+1. Open **Failover Cluster Manager**.
+1. In **Storage > Disks** page, Add the disk.
+1. Switch to the cluster summary page and select **Configure Cluster Quorum Settings** in **More Actions**.
+1. **Select the quorum witness**.
+1. **Configure a disk witness**.
+1. Check the disk.
+
+The disk should now be assigned to *Disk Witness in Quorum*.
 
 ----
 
 ### Creating a protected VM in CSV
 
-In case you create a VM newly,
-- In **Role** page, select **New Virtual Machine** in **Virtual Machines**
+In the case you created a new VM
+- In Failover Cluster Manager's **Roles** page, select **New Virtual Machine** in **Virtual Machines**.    
+    \*Be sure to set the VM and VHDX locations to the cluster storage volume.
 
-In case you import an existing VM,
-- Import a VM on **Hyper-V Manager**
-- In **Role** page, select **Configure Role**
+In the case that you import an existing VM into Failover Cluster Manager
+- Import a VM into **Hyper-V Manager** (or use an existing VM).
+- In Failover Cluster Manager's **Roles** page, select **Configure Role**, and then select **Virtual Machine**.
 
-After creating a protected VM, configure as follows on **Hyper-V Manager**.
+After creating or importing a protected VM, configure VM settings as follows on **Hyper-V Manager**:
 - **Automatic Start Action**
 	- **Nothing**
 - **Automatic Stop Action**
@@ -287,8 +301,8 @@ After creating a protected VM, configure as follows on **Hyper-V Manager**.
 
 ### Configuring WSFC Live Migration
 
-- In **Networks** page, select **Live Migration Settings**
-- Uncheck networks other than VM_network
+- In Failover Cluster Manager's **Networks** page, select **Live Migration Settings**.
+- Uncheck networks other than VM_network.
 
 ----
 
@@ -296,7 +310,7 @@ After creating a protected VM, configure as follows on **Hyper-V Manager**.
 
 To prevent conflicts between recovery actions, WSFC recovery action needs to be disabled.
 
-Checking a current quarantine configuration:
+Check the current quarantine configuration:
 ```
 > get-cluster | Select Name,Resiliency*,Quarantine*
 
@@ -307,19 +321,19 @@ QuarantineDuration      : 7200
 QuarantineThreshold     : 3
 ```
 
-Changing a quarantine configuration:
+Change the quarantine configuration:
 ```
 > (Get-Cluster).ResiliencyDefaultPeriod = 9999
 > (Get-Cluster).QuarantineThreshold = 9999
 ```
 
-WSFC behavior after executing the above command:
-- After WSFC detects another cluster node is isolated, WSFC wait 9999 seconds until it starts recovery action.
-- WSFC quarantines a cluster node that has be turned off unintentionally 9999 times in a hour.
+WSFC behavior after executing the above commands:
+- After WSFC detects the other cluster node is isolated, WSFC waits 9999 seconds until it starts recovery action.
+- WSFC quarantines a cluster node that has been turned off unintentionally 9999 times in an hour.
 
-Disabling a VM failover function:
-1. Open VM property on **Failover Cluster Manager**.
-1. In **Failover** tab, change settings as follows.
+Disabe the VM failover function:
+1. Open VM property in **Failover Cluster Manager**.
+1. In **Failover** tab, change settings as follows:
 	- **Maximum failures in the specified period**: 0
 	- **Period (hours)**: 0
 	- **Prevent failback**
@@ -328,64 +342,68 @@ Disabling a VM failover function:
 
 ### Configuring ssh settings
 
-SSH setting is required to allow EC-VM to send commands to host servers.
+SSH is required to allow each EC-VM to send commands to host servers.
 
-On host servers,
+On host servers:
 1. Download OpenSSH-Win64.zip
 	- https://github.com/PowerShell/Win32-OpenSSH/releases
-1. Unzip the file and move OpenSSH-Win folder under *Program Files* folder
-1. Execute **install-sshd.ps1**
-1. Open **Service Manager**, start **Open SSH SSH Server** and change its startup type to **Automatic**
+1. Unzip the file and move the OpenSSH-Win64 folder under *Program Files* folder.
+1. Execute **install-sshd.ps1**.
+1. Open **Service Manager**, start the **OpenSSH SSH Server** service, and change its startup type to **Automatic**.
 
-On EC-VMs,
-1. Create ssh key pair
+On EC-VMs:
+1. Create a ssh key pair.
 
 	```
 	# yes no | ssh-keygen -t rsa -f /root/.ssh/id_rsa -N ""
 	```
-1. Copy the public key to host servers
+1. Copy the public key to host servers.    
+    \*TCP port 22 needs to be opened through the host server’s firewall.
 
 	```
 	# scp /root/.ssh/id_rsa.pub Administrator@<IP of host 1>:C:\\ProgramData/ssh/<EC-VM hostname>
 	# scp /root/.ssh/id_rsa.pub Administrator@<IP of host 2>:C:\\ProgramData/ssh/<EC-VM hostname>
 	```
 
-On host servers,
+On host servers:
 1. Merge EC-VM's key files into **administrators_authorized_keys**.
 	```
 	> type C:\ProgramData\ssh\ec-vm1 C:\ProgramData\ssh\ec-vm2 > administrators_authorized_keys
+	(e.g. if EC-VM hostnames are ec-vm1 and ec-vm2 respectively)
 	```
-1. Add following lines to **sshd_config** in *C:\ProgramData\ssh*
+1. Add the following lines to **sshd_config** in *C:\ProgramData\ssh*.
 	```
 	PubkeyAuthentication yes
 	PasswordAuthentication no
 	PermitEmptyPasswords yes
 	```
-1. Edit file permission of **administrators_authorized_keys**
-	- Open the property
-	- Click **Advanced** in **Security** tab
-	- Click **Disable inheritance**
-	- Select **Convert inherited permissions into explicit permissions on this object**
-	- Delete **Authenticated Users**
-1. Restart **OpenSSH SSH Server**
+1. Edit file permissions of **administrators_authorized_keys**.
+	- Open the properties dialog of the file.
+	- Click **Advanced** in **Security** tab.
+	- Click **Disable inheritance**.
+	- Select **Convert inherited permissions into explicit permissions on this object**.
+	- Delete **Authenticated Users** from Permission entries.
+1. Restart the **OpenSSH SSH Server** service.
 
-After the above all steps, confirm that EC-VM1 and 2 can connect to both servers by ssh command without typing a password.
+After completing all of the above steps, confirm that EC-VM1 and 2 can connect to both host servers using the ssh command without typing a password.    
+
+e.g.  \# ssh -i .ssh/id_rsa -l \<Administrator account\> \<host IP\>
 
 ----
 
 ### Adding EXEC resources to control a VM and live migration
 
-1. Downloading scripts from GitHub repository
-1. Adding to a EXEC resource to control a VM
+1. Download [scripts](scripts) from GitHub repository.
+1. Add an EXEC resource to control a VM in Cluster WebUI.
 	- e.g. Resource name is *exec-VMNAME*
-	- Depends on *exec-iscsi*
-	- Replacing *start.sh* with *vm-start.pl*
-	- Editing **Configuration** section in the start script.
-	- Replacing *stop.sh* with *vm-unregister.pl*
-	- Editing **Configuration** section in the stop script.
-	- **Log Output Path** in **Tuning** page is */opt/nec/clusterpro/log/exec-VMNAME.log*
-	- Checking *Rotate Log* in **Tuning** page
-1. Applying the cluster configuration
+	- Depends on *exec-iscsi*.
+	- Replace *start.sh* with *vm-start.pl*.
+	- Edit the **Configuration** section in the start script to match your environment.
+	- Replace *stop.sh* with *vm-stop.pl*.
+	- Edit the **Configuration** section in the stop script to match your environment.
+	- Set **Log Output Path** in **Tuning** page, **Maintenance** tab, to */opt/nec/clusterpro/log/exec-VMNAME.log*.
+	- Check *Rotate Log* on **Maintenance** tab.
+1. **Apply the Configuration File**.
 
 ----
 
@@ -393,50 +411,53 @@ After the above all steps, confirm that EC-VM1 and 2 can connect to both servers
 
 One custom monitor resource is needed per VM, and one is needed per cluster.
 
-1. Adding to a custom monitor resource to monitor a VM
+1. Add a custom monitor resource to monitor a VM in Cluster WebUI
 	- e.g. Monitor name is *genw-VMNAME*
-	- **Retry Count** is 1
-	- Monitor timing is when *exec-VMNAME* is active
-	- Replacing *genw.sh* with *genw-vm.pl*
-	- Editing **Configuration** section in the monitor script
-	- **Log Output Path** is */opt/nec/clusterpro/log/genw-VMNAME.log*
-	- Checking **Rotate Log**
-	- **Normal Return Value** is 0
-	- **Recovery Action** is **Executing failover to the recovery target**
-	- **Recovery Target** is the failover group that includes the VM
-1. Adding to a custom monitor resource to monitor an opposite EC-VM
+	- **Retry Count** is 1.
+	- Monitor timing is when *exec-VMNAME* is active.
+	- Replace *genw.sh* with *genw-vm.pl*.
+	- Edit the **Configuration** section in the monitor script to match your environment.
+	- **Log Output Path** is */opt/nec/clusterpro/log/genw-VMNAME.log*.
+	- Check **Rotate Log**.
+	- **Normal Return Value** is 0.
+	- **Recovery Action** is **Executing failover to the recovery target**.
+	- **Recovery Target** is the failover group that includes the VM.
+1. Add a custom monitor resource to monitor the standby EC-VM
 	- e.g. Monitor name is *genw-remote-node*
-	- Monitor timing is when the md resource is active
-	- Replacing *genw.sh* with *genw-remote-node.pl*
-	- Editing **Configuration** section in the monitor script
-	- **Log Output Path** is */opt/nec/clusterpro/log/genw-remote-node.log*
-	- Checking **Rotate Log**
-	- **Normal Return Value** is 0
-	- **Recovery Action** is **Custom settings**
-	- **Recovery Target** is **LocalServer**
-	- **Final Action** is **No operation**
+	- Monitor timing is when the md resource is active.
+	- Replace *genw.sh* with *genw-remote-node.pl*.
+	- Edit the **Configuration** section in the monitor script to match your environment.
+	- **Log Output Path** is */opt/nec/clusterpro/log/genw-remote-node.log*.
+	- Check **Rotate Log**.
+	- **Normal Return Value** is 0.
+	- **Recovery Action** is **Custom settings**.
+	- **Recovery Target** is **LocalServer**.
+	- **Final Action** is **No operation**.
+1. **Apply the Configuration File**.
 
 ----
 
-## How to operate a cluster
+## Script details
 
 *exec-VMNAME*
-- When it starts, VM is registered on Hyper-V Manager and powered on.
-- When it stops, VM is unregistered on Hyper-V Manager and powered off.
+- When it starts, the VM is registered on Hyper-V Manager and powered on.
+- When it stops, the VM is unregistered on Hyper-V Manager and powered off.
 
 *genw-VMNAME*
-- Executing the recovery action if VM is not running on its host server.
+- Executes the recovery action if the VM is not running on its host server.
 
 *genw-remote-node*
-- Starting ECX cluster if it is not running on the opposite EC-VM.
-- Powering on the opposite EC-VM if it is not running.
+- Starts the ECX cluster if it is not running on the standby EC-VM.
+- Powers on the standby EC-VM if it is not running.
+
+## How to operate a cluster
 
 How to execute Live Migration:
-- In case that an user moves a failover group manually and a VM is running on a source server, Live Migration is executed without stopping the VM.
+- In the case that a user moves a failover group manually and a VM is running on the source server, Live Migration is executed without stopping the VM.
 
 How to stop the VM to change its property:
 - Suspend *genw-VMNAME*.
-- Please note that VM should be powered on after changing its property and before resuming *genw-VMNAME*.
+- Please note that the VM should be powered on after changing its property and before resuming *genw-VMNAME*.
 
 ## Testing
 
