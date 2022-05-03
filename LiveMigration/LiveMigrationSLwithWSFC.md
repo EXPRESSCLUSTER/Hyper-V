@@ -79,8 +79,8 @@ Once a cluster is created, in **Networks** setting, disable networks other than 
 ### Set up an ECX Witness Server
 
 The host servers and EC VMs cannot be used for this purpose. Use a separate server, as the diagram indicates.
-- [Windows Instructions](https://docs.nec.co.jp/sites/default/files/minisite/static/8040160a-cffb-4492-ad83-db0cc52fec86/ecx_x43_windows_en/W43_RG_EN/W_RG_07.html#witness-server-service)
-- [Linux Instructions](https://docs.nec.co.jp/sites/default/files/minisite/static/3eccef94-8a6c-4a5d-b42a-51d243d264de/ecx_x43_linux_en/L43_RG_EN/L_RG_07.html#witness-server-service)
+- [Set up Witness Server on Windows](https://docs.nec.co.jp/sites/default/files/minisite/static/8040160a-cffb-4492-ad83-db0cc52fec86/ecx_x43_windows_en/W43_RG_EN/W_RG_07.html#witness-server-service)
+- [Set up Witness Server on Linux](https://docs.nec.co.jp/sites/default/files/minisite/static/3eccef94-8a6c-4a5d-b42a-51d243d264de/ecx_x43_linux_en/L43_RG_EN/L_RG_07.html#witness-server-service)
 
 ----
 
