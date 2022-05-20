@@ -308,37 +308,20 @@ sub VmPowerOn {
 
 	# Start VM
 	if (&execution("$ssh_prefix $ownhost_ip Powershell \"Set-Variable ProgressPreference SilentlyContinue; Start-VM $vm_name\"")) {
-		&Log("[W][VmPowerOn] [$vm_name] failed to start.\n");
-		
 		# Countermeasure for the case "shutting down active node".
-		# In this case, the target VM live migrate to the standby node,
-		# --> the VM get PausedCritical due to inactivation and activatio of the MD
+		# In the case, the target VM live migrate to the standby node,
+		# --> the VM get to the PausedCritical state due to inactivation and activatio of the MD
 		# --> the VM get to the Running state after the VHD is repaired.
-
-		my $line = join ("", @lines);
-		$line =~ s/[\r\n]//g;
-		if ($line =~ /'.*' failed to resume..*Virtual hard disk .* has not yet recovered from a previous error./){
-			&execution("clplogcmd -l WARN -m \"[$vm_name] failed to resume. Wait for Running state.\"");
-			while ( 1 ) {
-				if (&execution("$ssh_prefix $ownhost_ip Powershell \"(Get-VM $vm_name).state\"")) {
-					&Log("[E][VmPowerOn] Get-VM failed\n"); 
-					return 1;
-				}
-				if ($lines[0] =~ /PausedCritical/) {
-					sleep 15;
-					next;
-				} elsif ($lines[0] =~ /Running/) {
-					last;
-				} else {
-					&Log("[E][VmPowerOn] Unknown case for the waiting to be resumed. [$vm_name] failed to start.\n");
-					return 1;
-				}
+		&execution("clplogcmd -l WARN -m \"Start-VM failed to start [$vm_name]. Wait for the Running state.\"");
+		@lines = ("");
+		until ($lines[0] =~ /^Running/) {
+			if (&execution("$ssh_prefix $ownhost_ip Powershell \"(Get-VM $vm_name).state\"")) {
+				&Log("[E][VmPowerOn] Get-VM failed\n"); 
+				return 1;
 			}
-			&execution("clplogcmd -l INFO -m \"[$vm_name] resumed.\"");
-			return 0;
+			sleep $interval;
 		}
-		&Log("[E][VmPowerOn] [$vm_name] failed to start. Unknown case: error message was not 'failed to resume'.\n");
-		return 1;
+		&execution("clplogcmd -l INFO -m \"[$vm_name] became the Running state.\"");
 	}
 	return 0;
 }
