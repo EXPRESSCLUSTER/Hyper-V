@@ -310,8 +310,11 @@ sub VmPowerOn {
 	if (&execution("$ssh_prefix $ownhost_ip Powershell \"Set-Variable ProgressPreference SilentlyContinue; Start-VM $vm_name\"")) {
 		# Countermeasure for the case "shutting down active node".
 		# In the case, the target VM migrate to the standby node,
-		# --> the VM get to the PausedCritical state due to inactivation and activation of the MD
-		# --> the VM get to the Running state after the VHD is repaired.
+		# the VM get to the { PausedCritical | OffCritical } state during inactivation and activation of the MD.
+		# Then the VM get to the { Running | Off } state after the VHD is repaired.
+		my $cntOff = 0;
+		my $cntFailed = 0;
+		my $vm_state_last = "";
 		&execution("clplogcmd -l WARN -m \"Start-VM failed to start [$vm_name]. Wait for the Running state.\"");
 		while ( 1 ) {
 			if (&execution("$ssh_prefix $ownhost_ip Powershell \"(Get-VM $vm_name).state\"")) {
@@ -323,11 +326,22 @@ sub VmPowerOn {
 			&Log("[D][VmPowerOn] VM state = [$vm_state]\n"); 
 			if ($vm_state eq "Running") { last; }
 			elsif ($vm_state eq "Off") {
-				if (($vm_state_last eq "OffCritical") or (3 == ++$cntOff)) {
+				if (($vm_state_last eq "OffCritical") or (3 <= ++$cntOff)) {
 					if (&execution("$ssh_prefix $ownhost_ip Powershell \"Set-Variable ProgressPreference SilentlyContinue; Start-VM $vm_name\"")) {
 						&Log("[E][VmPowerOn] Get-VM failed.\n"); 
 						return 1;
 					}
+				}
+			}
+			elsif ($vm_state eq "Failed") {
+				# Start-VM ended up with Failed state for the VM. Reissuing Start-VM as a non-refundable insurance.
+				if (3 <= ++$cntFailed) {
+					&Log("[E][VmPowerOn] $vm_name failed to start (count over)\n");
+					return 1;
+				}
+				if (&execution("$ssh_prefix $ownhost_ip Powershell \"Set-Variable ProgressPreference SilentlyContinue; Start-VM $vm_name\"")) {
+					&Log("[E][VmPowerOn] Start-VM failed\n");
+					return 1;
 				}
 			}
 			$vm_state_last = $vm_state;
