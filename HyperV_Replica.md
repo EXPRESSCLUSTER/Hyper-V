@@ -24,7 +24,7 @@ This document describes how to maintain Hyper-V Replica after the failover.
 	4. Choose to Allow replication from any authenticated server and specify a location for Replica files.
 	5. Open the firewall and enable the rules Hyper-V Replica HTTP Listener (TCP-In) and Hyper-V Replica HTTPS Listener (TCP-In)
 
-4.	Follow directions from the [Quick Start Guide for Windows Server 2016 Hyper-V](https://www.nec.com/en/global/prod/expresscluster/en/support/Setup.html#Virtualization) to set up Hyper-V, install and configure ExpressCluster X, and create a VM on the mirror disk on Server 2 and Server 3.
+4.	Follow directions from the [Quick Start Guide for Windows Server 2016 Hyper-V](https://www.nec.com/en/global/prod/expresscluster/en/support/Setup.html#Virtualization) to set up Hyper-V, install and configure ExpressCluster X, and create a VM on the mirror disk on Server 1 and Server 2.
 
 	**Note**: Assuming nested virtulization, if the Primary and Standby ECX servers are VMs, run the following commands on the host machine for each ECX VM to allow the installation of Hyper-V. The ECX VMs must be turned off in order to run these commands:
 
