@@ -58,7 +58,7 @@ On PM1
 On PM2
   1. open Hyper-V Manager
   2. right click Hyper-V host PM2 > [Import Virtual Machine]
-  3. specify [x:\\Hyper-V\\VM Configs\\VM1] as [Folder] Locate Folder > [Next]
+  3. specify [x:\\Hyper-V\\VM Configs\\VM1] as [Folder] > [Next]
   4. select [**Register the virtual machine in-place (use the existing unique ID)**] > [Next]
   5. [Finish]
 
