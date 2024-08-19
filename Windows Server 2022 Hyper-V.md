@@ -1,4 +1,4 @@
-# ExpressCluster: Hyper-V Host Clustering Solution on Windows server 2022
+# ExpressCluster: Hyper-V Host Clustering Solution on Windows Server 2022
 
 This document provides a step-by-step guide for setting up a high-availability cluster of Hyper-V hosts.
 This method also allows for the replication of **virtual machines (VMs)** across **cluster nodes** (physical machines).   
@@ -145,7 +145,7 @@ Please refer to [EXPRESSCLUSTER manual](https://www.nec.com/en/global/prod/expre
 ## Restriction
 VMs stored in the same MD resource need to move/failover together. It's good to control such VMs in the same failover group.
 
-## Test and confirmation
+## Testing Scenarios
 
 |No.| Test item                       | Confirmation |
 |---|---                              |---           |
