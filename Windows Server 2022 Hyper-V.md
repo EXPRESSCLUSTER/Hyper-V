@@ -1,7 +1,7 @@
 # ExpressCluster: Hyper-V Host Clustering Solution on Windows Server 2022
 
 This document provides a step-by-step guide for setting up a high-availability cluster of Hyper-V hosts.
-This method also allows for the replication of **virtual machines (VMs)** across **cluster nodes** (physical machines).   
+This method also allows for the replication of **virtual machines (VMs)** across **cluster nodes** (physical machines).
 The minimum requirement is to have two nodes configured with EXPRESSCLUSTER, and there is no need for shared storage.
 
 ## System Diagram
@@ -12,8 +12,8 @@ The minimum requirement is to have two nodes configured with EXPRESSCLUSTER, and
   |   Hyper-V                      | VM1                   | |
   | - EXPRESSCLUSTER X 5.2         | - Windows Server 2022 | |
   |   - Mirror Disk Resource       +-----------------------+ |
-  |     - Data Partition       (X:\)                         |
-  |     - Cluster Partition    (Y:\)                         |
+  |     - Data Partition       (X:\)  |                      |
+  |     - Cluster Partition    (Y:\)  |                      |
   +-----------------------------------|----------------------+ 
                                       |
                                       | Mirroring
@@ -77,8 +77,8 @@ Please refer to [EXPRESSCLUSTER manual](https://www.nec.com/en/global/prod/expre
 1. Choose the generation of the virtual machine and click **Next**.
 1. Specify the amount of memory and click **Next**.
 1. Select the virtual switch and click **Next**.
-1. Select [Create a virtual hard disk]> specify **X:\VM** as [Location] > specify [Name] and [Size] on requisit > **Next**
-1. Specify Installation Options on requisit > **Next**
+1. Select [Create a virtual hard disk]> specify **X:\VM** as [Location] > specify [Name] and [Size] on requisite > **Next**
+1. Specify Installation Options on requisite > **Next**
 1. Check the parameters and click **Finish**.
 1. Choose installation method and click **Next**.
 1. Check the parameters and click **Finish**.
@@ -151,4 +151,4 @@ VMs stored in the same MD resource need to move/failover together. It's good to 
 |---|---                              |---           |
 | 1 | start the failover group on Server1 | Server1 started VM1 |
 | 2 | move the failover group to Server2  | Server1 stopped VM1, then Server2 started VM1 |
-| 3 | power off Server2                   | Server1 noticed heart beat timeout, then startd VM1 |
+| 3 | power off Server2                   | Server1 noticed heartbeat timeout, then started VM1 |
