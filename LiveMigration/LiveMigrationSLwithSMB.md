@@ -9,7 +9,7 @@ Configuring VM Live Migration in Hyper-V host cluster with SMB.
 	- Hyper-V VMs are created on the SMB VM.
 - ECX protects VMs on Hyper-V, means start / stop / monitor and realizing failover of VMs across Hyper-V boxes.
 
-	![Architecture](Hyper-V-cluster-architecture-SMB.png)
+	![Architecture](Hyper-V-cluster-architecture-SMB.PNG)
 
 ## Network
 
