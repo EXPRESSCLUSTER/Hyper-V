@@ -30,15 +30,15 @@ The minimum requirement is to have two nodes configured with EXPRESSCLUSTER, and
 ```
 
 ### Cluster Configuration
-- For Windows Server 2022 Hyper-V Host OS Cluster, following resources are required:
-	- One or more Mirror Disk
-    - The drive letter for data partition of MD resource is *X: drive*
-	- One script resource per one VM
-  - The failover group is online on Server1 to allow access to MD resource.
-  - The *Hyper-V Integration Services* is installed on to VM to be controlled.  
+- For Windows Server 2022 Hyper-V Host OS Cluster, the following resources are required:
+	- One or more Mirror Disks
+    - The drive letter for the data partition of the MD resource is *X: drive*
+	- One script resource per VM
+  - The failover group is online on Server1 to allow access to the MD resource.
+  - *Hyper-V Integration Services* is installed onto the VM to be controlled.  
 
 ### Folder Configuration
-- On Data Partition, create a folder to store Hyper-V VM.
+- On the Data Partition, create a folder to store the Hyper-V VM.
 	- e.g.)
 		```bat
 		X:
@@ -53,17 +53,17 @@ The minimum requirement is to have two nodes configured with EXPRESSCLUSTER, and
 1. Check **Hyper-V** and click **Add Features**.
 1. Click **Confirmation** on left pane.
 1. Click **Install**.
-1. After installation is completed, restart OS.
+1. After installation is complete, restart OS.
 
 ### Create Virtual Switch on Both Servers (Primary and Secondary)
-The virtual switch name must be the same between on primary and on secondary server.
+The virtual switch name must be the same on the primary and secondary servers.
 1. Launch **Hyper-V Manager**.
 1. Click **Virtual Switch Manager** on right pane.
 1. Select virtual switch type (e.g. External) and click **Create Virtual Switch**.
-1. Enter **Name** (e.g. vswitch) and select actual network interface card (e.g. Broadcom NetXtreme Gigabit Ethernet). Click **OK**.
+1. Enter a **Name** (e.g. vswitch) and select the actual network interface card (e.g. Broadcom NetXtreme Gigabit Ethernet). Click **OK**.
 
 ### Install EXPRESSCLUSTER on Both Servers (Primary and Secondary)
-Please refer to [EXPRESSCLUSTER manual](https://www.nec.com/en/global/prod/expresscluster/en/doc/manuals/W52_IG_EN_02.pdf)
+Please refer to the [EXPRESSCLUSTER manual](https://www.nec.com/en/global/prod/expresscluster/en/doc/manuals/W52_IG_EN_02.pdf).
 
 ### Create a Base Cluster
 - Create a failover group that includes a mirror disk resource.
@@ -77,29 +77,27 @@ Please refer to [EXPRESSCLUSTER manual](https://www.nec.com/en/global/prod/expre
 1. Choose the generation of the virtual machine and click **Next**.
 1. Specify the amount of memory and click **Next**.
 1. Select the virtual switch and click **Next**.
-1. Select [Create a virtual hard disk]> specify **X:\VM** as [Location] > specify [Name] and [Size] on requisite > **Next**
-1. Specify Installation Options on requisite > **Next**
+1. Select [Create a virtual hard disk]> specify **X:\VM** as [Location] > specify [Name] and [Size] on requisite > **Next**.
+1. Specify Installation Options on requisite. click **Next**.
 1. Check the parameters and click **Finish**.
 1. Choose installation method and click **Next**.
 1. Check the parameters and click **Finish**.
-1. Open EC WebUI > move the failover group to Server2 (Secondary Server)
+1. Open EC WebUI > move the failover group to Server2 (Secondary Server).
 
 ### On Server2 (Secondary Server)
 1. Launch **Hyper-V Manager** on the Secondary server.
-1. Right click Hyper-V host Server2 > [Import Virtual Machine]
-1. specify **X:\VM\VM1** as [Folder] > **Next**
-1. select **Register the virtual machine in-place (use the existing unique ID)** > and click **Next**
+1. Right click Hyper-V host Server2 > [Import Virtual Machine].
+1. Specify **X:\VM\VM1** as [Folder] > **Next**.
+1. Select **Register the virtual machine in-place (use the existing unique ID)** > and click **Next**
 1. **Finish**.
 
 **Open EC WebUI**
-  1. stop the failover group
-  2. change to [Config mode]
+  1. Stop the failover group.
+  2. Change to [Config mode].
 
   **NOTE** : The following assumes the name of the VM as *vm1*
 
-  ### Add the Script Resource to Control the Virtual Machine
-
-  3. add [Script resource] to the failover group >  
+  3. **Add the Script Resource to Control the Virtual Machine** — add [Script resource] to the failover group >  
 
      edit [start.bat]
 
@@ -126,7 +124,7 @@ Please refer to [EXPRESSCLUSTER manual](https://www.nec.com/en/global/prod/expre
         powershell -Command "Stop-VM -Name %VMNAME% -Force"
        ```
 
-  4. add [Custom Monitor resource]
+  4. **Add the Custom Monitor Resource** — add [Custom Monitor resource]
 
         edit [genw.bat]
 
