@@ -30,13 +30,13 @@ If you are lucky, the error messages will be obvious.
 
         Not enough memory in the system to start the virtual machine <guest vm>.
 
-        Could not initialize memory: Ran out of memory (0x80070000E).
+        Could not initialize memory: Ran out of memory (0x8007000E).
 
         '<guest vm>' failed to start. (Virtual machine ID 20830CED-0629-4CC2-9AD9-21F6E87E3BE1)
 
         Not enough memory in the system to start the virtual machine <guest vm> with ram size 2048 megabytes. (Virtual machine ID 20830CED-0629-4CC2-9AD9-21F6E87E3BE1)
 
-        '<guest vm>' could not initialize memory: Ran out of memory (0x80070000E). (Virtual machine ID 20830CED-0629-4CC2-9AD9-21F6E87E3BE1)    
+        '<guest vm>' could not initialize memory: Ran out of memory (0x8007000E). (Virtual machine ID 20830CED-0629-4CC2-9AD9-21F6E87E3BE1)    
 
 3. Get-ClusterResource might have the following output:    
 
@@ -52,4 +52,4 @@ If you need to dig deeper, examine the WSFC log files for the following entry:
 
 ExpressCluster log files may also provide clues.
   
-**SOLUTION:** Increase memory on host machine or increase CPUs.
+**SOLUTION:** Increase memory on the host machine and/or increase CPUs.
