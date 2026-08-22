@@ -1,10 +1,10 @@
 # Live Migration solution with WSFC **(Note: This content is incomplete and under investigation.)**
 
-Configuring VM Live Migration in Hyper-V host cluster with WSFC.
+Configuring VM Live Migration in a Hyper-V host cluster with WSFC.
 
 ## Architecture
 
-- ECX is installed on VMs where iSCSI target service is running. ECX replicates the disk configured as an iSCSI target.
+- ECX is installed on VMs where the iSCSI target service is running. ECX replicates the disk which is configured as an iSCSI target.
 	- Hyper-V VMs are created on the iSCSI target disk.
 	- ECX data mirroring provides a virtual shared disk for WSFC.
 	- WSFC uses the virtual shared disk as a Cluster Shared Volume (CSV).
@@ -15,7 +15,7 @@ Configuring VM Live Migration in Hyper-V host cluster with WSFC.
 ## Network
 
 - Separate network for VM / management of VM and cluster / mirroring / iSCSI / Live Migration.
-- One server is needed outside a WSFC cluster for ECX witness and WSFC quorum disk. Ideally this server should also be clustered, but currently this document describes a configuration with two WSFC servers and one quorum disk.
+- One server is needed outside of a WSFC cluster for ECX witness and a WSFC quorum disk. Ideally this server should also be clustered, but currently this document describes a configuration with two WSFC servers and one quorum disk.
 
 	![Network](Network-WSFC.PNG)
 
@@ -96,7 +96,7 @@ Open **Hyper-V Manager** on each host machine and create a new VM.
 - 3 NICs
 - 2 HDDs, 30GB for OS and 25GB for mirror disk
 
-After creating EC-VMs, change the VM settings as follows (stop them first!):
+After creating EC-VMs, change the VM settings as follows (*stop them first!*):
 - **Automatic Start Action**
 	- **Always start this virtual machine automatically**
 	- **Startup delay**: 5 seconds
@@ -118,7 +118,7 @@ Once OS installation is finished, do the following on each EC VM:
 	```
 1. Network settings
 	- Configure IP addresses, gateway, DNS, proxy
-1. Install iSCSI **targetcli**, **unzip**, **tar** and **perl** with yum command
+1. Install iSCSI **targetcli**, **unzip**, **tar** and **perl** with the yum command
 
 	```
 	# yum -y install targetcli unzip tar
@@ -160,10 +160,10 @@ Once OS installation is finished, do the following on each EC VM:
 		```
 		You only need to edit *3600224804fb4d824c64c0f4156f86fc9* depending on your environment.
 
-1. Install ECX
-    rpm -ivh expresscls*.rpm
-1. Register ECX license files
-    clplcnsc -i ECX*.key
+1. Install ECX    
+    *rpm -ivh expresscls\*.rpm*
+1. Register ECX license files    
+    *clplcnsc -i ECX\*.key*
 1. Reboot OS
 1. Confirm that the symbolic link is enabled.
 	```
@@ -179,7 +179,7 @@ If you are not familiar with ECX cluster configuration, you can follow this [gui
     - Be sure the [Witness Server](#Set-up-an-ECX-Witness-Server) is already set up.
 - HTTP NP
 - Floating IP address
-	- Should belong to the network connecting to iSCSI_switch.
+	- Should belong to the network connecting to the iSCSI_switch.
 - Mirror disk
 	- File System: none
 	- Data Partition Device Name: /dev/cp-diska2
@@ -188,7 +188,7 @@ If you are not familiar with ECX cluster configuration, you can follow this [gui
 	- e.g. Resource name is *exec-iscsi*
 	- Should depend on the Floating IP resource and Mirror disk resource.
 		- Add Floating IP and Mirror disk resources in the **Dependency** tab.
-	- Replace scripts with new scripts below:
+	- Replace scripts with the new scripts below:
 
 		*start.sh*
 		```
@@ -261,7 +261,7 @@ This disk will be configured as a WSFC cluster shared volume in the next steps.
 
 ### Configuring quorum disk
 
-A shared disk that is accessible from both hosts is needed outside host servers.
+A shared disk that is accessible from both hosts is needed outside of the host servers.
 
 A quorum disk size should be larger than 512MB.
 - https://docs.microsoft.com/en-us/windows-server/failover-clustering/manage-cluster-quorum
@@ -269,7 +269,7 @@ A quorum disk size should be larger than 512MB.
 You can co-locate the disk on the ECX witness server and configure it as an iSCSI target.
 
 1. Open **Disk Management** on either host server.
-1. Bring the new disk online, initiialize it, and format it as NTFS.
+1. Bring the new disk online, initialize it, and format it as NTFS.
 1. Open **Disk Management** on the other host server, and bring the new disk online.
 1. Open **Failover Cluster Manager**.
 1. In **Storage > Disks** page, Add the disk.
@@ -332,7 +332,7 @@ WSFC behavior after executing the above commands:
 - After WSFC detects the other cluster node is isolated, WSFC waits 9999 seconds until it starts recovery action.
 - WSFC quarantines a cluster node that has been turned off unintentionally 9999 times in an hour.
 
-Disabe the VM failover function:
+Disable the VM failover function:
 1. Open VM property in **Failover Cluster Manager**.
 1. In **Failover** tab, change settings as follows:
 	- **Maximum failures in the specified period**: 0
@@ -394,7 +394,7 @@ e.g.  \# ssh -i .ssh/id_rsa -l \<Administrator account\> \<host IP\>
 
 ### Adding EXEC resources to control a VM and live migration
 
-1. Download [scripts](scripts) from GitHub repository.
+1. Download [perl scripts](scripts) from the GitHub repository.
 1. Add an EXEC resource to control a VM in Cluster WebUI.
 	- e.g. Resource name is *exec-VMNAME*
 	- Depends on *exec-iscsi*.
@@ -402,13 +402,13 @@ e.g.  \# ssh -i .ssh/id_rsa -l \<Administrator account\> \<host IP\>
 	- Edit the **Configuration** section in the start script to match your environment.
 	- Replace *stop.sh* with *vm-stop.pl*.
 	- Edit the **Configuration** section in the stop script to match your environment.
-	- Set **Log Output Path** in **Tuning** page, **Maintenance** tab, to */opt/nec/clusterpro/log/exec-VMNAME.log*.
+	- Set **Log Output Path** in the **Tuning** page, **Maintenance** tab, to */opt/nec/clusterpro/log/exec-VMNAME.log*.
 	- Check *Rotate Log* on **Maintenance** tab.
 1. **Apply the Configuration File**.
 
 ----
 
-### Adding custom monitor resource for a VM
+### Adding custom monitor resources for a VM
 
 One custom monitor resource is needed per VM, and one is needed per cluster.
 
@@ -454,7 +454,7 @@ One custom monitor resource is needed per VM, and one is needed per cluster.
 ## How to operate a cluster
 
 How to execute Live Migration:
-- In the case that a user moves a failover group manually and a VM is running on the source server, Live Migration is executed without stopping the VM.
+- In the case that a user moves a failover group manually and a VM is running on the source server, **Live Migration** is executed without stopping the VM.
 
 How to stop the VM to change its property:
 - Suspend *genw-VMNAME*.
