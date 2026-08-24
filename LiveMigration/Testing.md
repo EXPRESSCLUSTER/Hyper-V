@@ -42,7 +42,7 @@ EC VM shutdown
 - Same result as Power off test.
 
 ## NP situation
-
+> **Note:** No network partition (NP) scenarios were tested in this configuration. Content may be added here later.
 
 ## Appendix
 
@@ -50,7 +50,7 @@ EC VM shutdown
 
 WSFC node status
 ```
-PS C:\Users\Administrator.2016DOM> Get-ClusterNode
+PS C:\Users\Administrator> Get-ClusterNode
 
 Name          State Type
 ----          ----- ----
@@ -60,7 +60,7 @@ ws2019-host-2 Up    Node
 ---
 CSV status
 ```
-PS C:\Users\Administrator.2016DOM> Get-ClusterSharedVolume
+PS C:\Users\Administrator> Get-ClusterSharedVolume
 
 Name           State  Node
 ----           -----  ----
@@ -88,7 +88,7 @@ When it is offline, the VM is not visible in Hyper-V Manager.
 ---
 Cluster group status
 ```
-PS C:\Users\Administrator.2016DOM> Get-ClusterGroup
+PS C:\Users\Administrator> Get-ClusterGroup
 
 Name              OwnerNode     State
 ----              ---------     -----
@@ -103,7 +103,7 @@ A cluster group *VMNAME* is created automatically when a VM is added to the WSFC
 ---
 Powershell command help
 ```
-PS C:\Users\Administrator.2016DOM> Get-Help -Name Get-ClusterNode
+PS C:\Users\Administrator> Get-Help -Name Get-ClusterNode
 
 NAME
     Get-ClusterNode
@@ -116,14 +116,14 @@ SYNTAX
 ---
 Powershell command list
 ```
-PS C:\Users\Administrator.2016DOM> Get-Command -Module FailoverClusters | Out-GridView
-PS C:\Users\Administrator.2016DOM> Get-Command -Module Hyper-V | Out-GridView
+PS C:\Users\Administrator> Get-Command -Module FailoverClusters | Out-GridView
+PS C:\Users\Administrator> Get-Command -Module Hyper-V | Out-GridView
 ```
 
 ---
 Collect WSFC logs
 ```
-PS C:\Users\Administrator.2016DOM\Downloads> get-clusterlog -destination . -Timespan 10080
+PS C:\Users\Administrator\Downloads> get-clusterlog -destination . -Timespan 10080
 
 Mode                LastWriteTime         Length Name
 ----                -------------         ------ ----
@@ -131,7 +131,7 @@ Mode                LastWriteTime         Length Name
 -a----        3/23/2022   6:26 PM      130351286 ws2019-host-2_cluster.log
 
 
-PS C:\Users\Administrator.2016DOM\Downloads>
+PS C:\Users\Administrator\Downloads>
 ```
 *Destination* option specifies the location where log files are saved.
 
