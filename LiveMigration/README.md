@@ -9,10 +9,10 @@ There are two ideas to utilize Live Migration in Hyper-V host cluster.
 
 ## Background
 
-Hyper-V Live Migration can work without WSFC in DR cluster, but VM files in the source machine are deleted after migration.
-For high-availability system, VM files should being synchronized at any time between cluster nodes.
-We can use mirror disk to synchronize VM files.
+Hyper-V Live Migration can work without WSFC in a DR cluster, but VM files in the source machine are deleted after migration.
+For high-availability systems, VM files should be synchronized at any time between cluster nodes.
+We can use a mirror disk to synchronize VM files.
 
-However Hyper-V Live Migartion requires that source and destination disk are accessible, while ECX standby server cannot access the mirror disk.
+However, Hyper-V Live Migration requires that the source **AND** destination disks are accessible at the same time. The problem is that the ECX standby server cannot access the mirror disk when the primary server has control of the disk.
 
-Therefore, we need to make mirror disk data accessible from both destination and source hosts in some way.
+Therefore, we need to make the mirror disk data accessible from both destination and source hosts in some way.
