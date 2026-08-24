@@ -42,12 +42,12 @@ if($? -eq $true){
   Write-Output "Time: "$time
   Write-Output "exit 0"
   Write-Output "----- Finish VM import check -----"
-  clplogcmd -m "Import target VM is succeeded." --alert -l INFO
+  clplogcmd -m "Import target VM succeeded." --alert -l INFO
   exit 0
 }
 Write-Output "Import-VM: Failure!"
 Write-Output $error[0]
-clplogcmd -m "Import target VM is failed. Try Compare-VM and Remove-VMSavedState." --alert -l WARN
+clplogcmd -m "Import target VM failed. Try Compare-VM and Remove-VMSavedState." --alert -l WARN
 
 # Execute Compare-VM to check the cause of import failure.
 # If Execute-VM command fails, exit 1.
@@ -60,7 +60,7 @@ if($? -eq $false){
   Write-Output "Time: "$time
   Write-Output "exit 1"
   Write-Output "----- Finish VM import check -----"
-  clplogcmd -m "Compare target VM is failed." --alert -l ERR
+  clplogcmd -m "Compare target VM failed." --alert -l ERR
   exit 1
 }
 Write-Output $report
@@ -96,7 +96,7 @@ if($? -eq $false){
   Write-Output $error[0]
   Write-Output "exit 1"
   Write-Output "----- Finish VM import check -----"
-  clplogcmd -m "Remove-VMSavedState is failed." --alert -l ERR
+  clplogcmd -m "Remove-VMSavedState failed." --alert -l ERR
   exit 1
 }
 Write-Output "Remove-VMSavedState: Success!"
@@ -113,7 +113,7 @@ if($? -eq $false){
   Write-Output "Time: "$time
   Write-Output "exit 1"
   Write-Output "----- Finish VM import check -----"
-  clplogcmd -m "Import target VM after Remove-VMSavedState is failed." --alert -l ERR
+  clplogcmd -m "Import target VM after Remove-VMSavedState failed." --alert -l ERR
   exit 1
 }
 Write-Output "Import-VM again: Success"
@@ -137,5 +137,5 @@ $time = Get-Date -Format "yyyy/MM/dd HH:mm:ss"
 Write-Output "Time: "$time
 Write-Output "exit 0"
 Write-Output "----- Finish VM import check -----"
-clplogcmd -m "Import target VM after Remove-VMSavedState is succeeded." --alert -l INFO
+clplogcmd -m "Import target VM after Remove-VMSavedState succeeded." --alert -l INFO
 exit 0
