@@ -291,7 +291,7 @@ sub VmMigration {
 }
 #--------------------------------------------------------------
 sub VmPowerOn {
-	# Assuming the situation where the VM is failed state and its owner is this machine.
+	# Assuming the situation where the VM is in a failed state and its owner is this machine.
 	# This situation occurs sometimes under Host OS shutdown test.
 	&execution("$ssh_prefix $ownhost_ip Powershell Get-ClusterGroup");
 	foreach (@lines) {
