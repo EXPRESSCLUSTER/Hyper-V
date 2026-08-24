@@ -1,14 +1,14 @@
 # How to improve robustness of Hyper-V Host cluster vm resource
 ## Overview
-If vm resource failover occurs for Host server unecpected shutdown, sometimes the vm resource failed to start on failover target server.
+When a vm resource failover occurs due to a Host server's unexpected shutdown, sometimes the vm resource fails to start on the failover target server.
 In such a case, it may be resolved by this solution.
 
 ## Symptoms
 A vm resource is activated on a Hyper-V host server which is clustered by EXPRESSCLUSTER.
-The server gets down unexpectedly and the vm resource failover occurs.
+The server goes down unexpectedly and the vm resource failover occurs.
 However the vm resource failed to start on the failover target Hyper-V host server.
 
-- EXRESSCLUSTER logs show as the followings
+- EXRESSCLUSTER logs show the following:
 	- userlog.log  
 	```bat
 	INFO  [rc   ] Starting vm resource
@@ -45,8 +45,8 @@ However the vm resource failed to start on the failover target Hyper-V host serv
 		* 40006: Could not find memory file.
 
 ## Cause
-For unexpected host server shutdown, saves state file or virtual memory file are removed.
-However, their info is not removed and remains in VM configuration file as the following.
+For an unexpected host server shutdown, the saved state file or virtual memory file are removed.
+However, their info is not removed and remains in the VM configuration file as shown below:
 ```bat
   <savedstate>
     <in_progress type="bool">False</in_progress>
@@ -55,10 +55,10 @@ However, their info is not removed and remains in VM configuration file as the f
     <vsvlocation type="string">M:\Hyper-V\W2012R2-gene2-16net-214\Virtual Machines\C520D71E-AE84-40D6-A2B5-B1F697821703\C520D71E-AE84-40D6-A2B5-B1F697821703.vsv</vsvlocation>
   </savedstate>
 ```
-For this mismatch, the error occurs.
+For this mismatch, an error occurs.
 
 ## Resolution
-To resolve it, you need to import the vm with Hyper-V Manager (GUI) or remove saved state info as the following.
+To resolve it, you need to import the vm with the Hyper-V Manager (GUI) or remove the saved state info as follows:
 ```bat
 PS C:\Users\administrator.JDPX> $report = Compare-VM -Path $path
 PS C:\Users\administrator.JDPX> $report.Incompatibilities[0].Source | Remove-VMSavedState
@@ -70,19 +70,19 @@ W2012R2-gene2-16net-214 Off   0           0                 00:00:00 Running
 ```
 
 ## Solution
-By applying this solution for your cluster, the resolution is executed automatically.
+By applying this solution to your cluster, the resolution is executed automatically.
 
 1. Add resource.
 	- Type: script resource
 	- FailoverThreshold -> Set Number: 0
 	- Final Action: No operation (activate next resource)
 1. Apply the configuration.
-1. Store [Remove-VMSavedState.ps1](https://github.com/EXPRESSCLUSTER/Hyper-V/blob/master/vmResourceRobustness/scripts/Remove_VMSavesState.ps1) under scripts folder:  
+1. Store [Remove-VMSavedState.ps1](https://github.com/EXPRESSCLUSTER/Hyper-V/blob/master/vmResourceRobustness/scripts/Remove_VMSavesState.ps1) under the scripts folder:  
    "C:\Program Files\EXPRESSCLUSTER\scripts\\\<failover-group name>\\\<script resource name>\Remove-VMSavedState.ps1"
-1. Edit the script resource which is added in step 1.
+1. Edit the script resource which was added in step 1.
 	- Details tab -> Add button -> Browse button -> Select  
 	  "C:\Program Files\EXPRESSCLUSTER\scripts\\\<failover-group name\>\\\<script resource name>\Remove-VMSavedState.ps1"
-	- Details tab -> Select start.bat -> Edit button -> Edit the bat file to call:
+	- Details tab -> Select start.bat -> Edit button -> Edit the .bat file to call the script:
 	  ```bat
 	  rem ***************************************
 	  rem *              start.bat              *
@@ -92,7 +92,7 @@ By applying this solution for your cluster, the resolution is executed automatic
 	  PowerShell .\Remove-VMSavedState.ps1
 	  exit 0
 	  ```
-1. Edit existing vm resource:
+1. Edit the existing vm resource:
 	- Dependency tab -> Uncheck "Follow the default dependency"
 	- Dependency tab -> Select script resource which is added in step1 -> Add button
 1. Apply the configuration.
