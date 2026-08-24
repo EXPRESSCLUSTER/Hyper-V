@@ -5,19 +5,19 @@ Configuring VM Live Migration in Hyper-V host cluster with SMB.
 
 ## Architecture
 
-- ECX is installed on host servers, and ECX replicates the disk that contains SMB VM.
+- ECX is installed on host servers and replicates the disk that contains the SMB VM.
 	- Hyper-V VMs are created on the SMB VM.
-- ECX protects VMs on Hyper-V, means start / stop / monitor and realizing failover of VMs across Hyper-V boxes.
+- ECX protects VMs on Hyper-V (start / stop / monitor and failover of VMs across Hyper-V boxes).
 
 	![Architecture](Hyper-V-cluster-architecture-SMB.PNG)
 
 ## Network
 
-- Separating network for VM / management of VM and cluster / mirroring / iSCSI / Live Migration.
+- Separating network for VM: management of VM and cluster / mirroring / iSCSI / Live Migration.
 
 	\<being edited\>
 
-## Setting up 2-node WSFC clutser
+## Setting up 2-node WSFC cluster
 
 ## Setting up Hyper-V network
 
