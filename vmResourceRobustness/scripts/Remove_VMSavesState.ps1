@@ -31,7 +31,7 @@ if($? -eq $true){
 Write-Output "Get-VM: Failure!"
 Write-Output $error[0]
 
-# Try Import-VM to check target VM can be importted.
+# Try Import-VM to check if target VM can be imported.
 #  ->Yes: exit 0
 #    No:  Go to next
 Write-Output "Execute Import-VM"
@@ -53,7 +53,7 @@ clplogcmd -m "Import target VM is failed. Try Compare-VM and Remove-VMSavedState
 # If Execute-VM command fails, exit 1.
 Write-Output "Execute Compare-VM"
 $report = Compare-VM -Path $path
-if($? -eq $failse){
+if($? -eq $false){
   Write-Output "Compare-VM: Failure!"
   Write-Output $error[0]
   $time = Get-Date -Format "yyyy/MM/dd HH:mm:ss"
@@ -65,7 +65,7 @@ if($? -eq $failse){
 }
 Write-Output $report
 
-# Check the import failure cause (Incompatibiity MessageID) is 40004.
+# Check the import failure cause (Incompatibility MessageID) is 40004.
 #  -> Yes: Go to next step
 #     No: exit 1
 $i = 0
@@ -113,7 +113,7 @@ if($? -eq $false){
   Write-Output "Time: "$time
   Write-Output "exit 1"
   Write-Output "----- Finish VM import check -----"
-  clplogcmd -m "Import target VM after Remove-VMSavedState is dailed." --alert -l ERR
+  clplogcmd -m "Import target VM after Remove-VMSavedState is failed." --alert -l ERR
   exit 1
 }
 Write-Output "Import-VM again: Success"
