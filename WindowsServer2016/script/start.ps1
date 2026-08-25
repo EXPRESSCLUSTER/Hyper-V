@@ -3,6 +3,7 @@
 #
 $ErrorStart = 1
 $ErrorRemove = 3
+$ErrorCopy = 4
 $ErrorImport = 5
 $ErrorGetVHD = 6
 $ErrorIcacls = 7
@@ -39,7 +40,7 @@ if ($bRet -eq $True)
 }
 else
 {
-        Write-Output "$env:VMCX1 does not exit"
+        Write-Output "$env:VMCX1 does not exist"
 }
 $bRet = Test-Path -Path $env:VMRS1
 if ($bRet -eq $True)
@@ -49,7 +50,7 @@ if ($bRet -eq $True)
 }
 else
 {
-        Write-Output "$env:VMRS1 does not exit"
+        Write-Output "$env:VMRS1 does not exist"
 }
 
 Write-Output "=== Import-VM ==="
@@ -61,8 +62,8 @@ if ($bRet -eq $False)
         Write-Output "Import-VM failed."
 
         Write-Output "=== robocopy ==="
-        Write-Output "SourcePaht: $env:DestPath"
-        Write-Output "DestPaht  : $env:SourcePath"
+        Write-Output "SourcePath: $env:DestPath"
+        Write-Output "DestPath  : $env:SourcePath"
         robocopy $env:DestPath $env:SourcePath /MIR
         $bRet = $LASTEXITCODE
         if ($bRet -ge 8)
