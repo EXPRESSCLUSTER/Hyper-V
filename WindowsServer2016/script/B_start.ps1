@@ -36,7 +36,7 @@ if ($bRet -eq $True)
 }
 else
 {
-        Write-Output "$env:VMCX1 does not exit"
+        Write-Output "$env:VMCX1 does not exist"
 }
 $bRet = Test-Path -Path $env:VMRS1
 if ($bRet -eq $True)
@@ -46,7 +46,7 @@ if ($bRet -eq $True)
 }
 else
 {
-        Write-Output "$env:VMRS1 does not exit"
+        Write-Output "$env:VMRS1 does not exist"
 }
 
 Write-Output "=== Import-VM ==="
