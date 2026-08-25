@@ -1,5 +1,5 @@
 rem ***************************************
-rem * stop.bat (script-mysql)             *
+rem * stop.bat                            *
 rem ***************************************
 
 cd "%CLP_SCRIPT_PATH%"
