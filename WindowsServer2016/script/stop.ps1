@@ -31,8 +31,8 @@ if ($bRet -eq $False)
 }
 
 Write-Output "=== robocopy ==="
-Write-Output "SourcePaht: $env:SourcePath"
-Write-Output "DestPaht  : $env:DestPath"
+Write-Output "SourcePath: $env:SourcePath"
+Write-Output "DestPath  : $env:DestPath"
 robocopy $env:SourcePath $env:DestPath /MIR
 $ret = $LASTEXITCODE
 if ($ret -ge 8)
