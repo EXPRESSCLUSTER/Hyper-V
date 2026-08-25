@@ -31,12 +31,12 @@
 ```
 
 ### Cluster configuration
-- For Windows Server 2016 Hyper-V Host OS Cluster, following resources are required:
-	- One or more Mirror Disk
-	- One script resource per one VM
+- For Windows Server 2016 Hyper-V Host OS Cluster, the following resources are required:
+	- One or more Mirror Disks
+	- One script resource per VM
 
 ### Folder configuration
-- On Data Partition, create a folder to store Hyper-V VM.
+- On Data Partition, create a folder to store Hyper-V VMs.
 	- e.g.)
 		```bat
 		X:
@@ -55,14 +55,14 @@
 1. After installation is completed, restart OS.
 
 ### Create Virtual Switch on Both Servers
-The virtual switch name must be the same between on primary and on secondary server.
+The virtual switch name must be the same on both the primary and on secondary servers.
 1. Launch **Hyper-V Manager**.
 1. Click **Virtual Switch Manager** on right pane.
 1. Select virtual switch type (e.g. External) and click **Create Virtual Switch**.
-1. Enter **Name** (e.g. vswitch) and select actual network interface card (e.g. Broadcom NetXtreme Gigabit Ethernet). Click **OK**.
+1. Enter **Name** (e.g. vswitch) and select an actual network interface card (e.g. Broadcom NetXtreme Gigabit Ethernet). Click **OK**.
 
 ### Install EXPRESSCLUSTER on Both Servers
-Please refer to [EXPRESSCLUSTER manual](https://www.nec.com/en/global/prod/expresscluster/en/support/manuals.html)
+Please refer to [EXPRESSCLUSTER manual](https://www.nec.com/en/global/prod/expresscluster/en/doc/manual.html?)
 
 ### Create a Base Cluster
 - Create a failover group that includes a mirror disk resource.
@@ -81,11 +81,11 @@ Please refer to [EXPRESSCLUSTER manual](https://www.nec.com/en/global/prod/expre
 1. Choose installation method and click **Next**.
 1. Check the parameters and click **Finish**.
 1. On Hyper-V Manager, select the virtual machine and click **Start**. And click **Connect**.
-1. Install OS on the virtual machine.
+1. Install an OS on the virtual machine.
 1. After the installation is complete, shutdown the virtual machine.
 1. Create a directory *(X:\vm\ws2016-VM\bak)* to take a backup of the virtual machine files.
 	- **Note**
-		- Backup directory should be created under VM directory as "*X:\vm\ws2016-VM\bak*".
+		- Backup directory should be created under the VM directory as "*X:\vm\ws2016-VM\bak*".
 			```bat
 			X:
 			 |
@@ -99,8 +99,8 @@ Please refer to [EXPRESSCLUSTER manual](https://www.nec.com/en/global/prod/expre
 			     |
 			     +- bak (includes backup *.vmcx/vmrs* files)
 			```
-		- If you cannot create it under VM directory as above, refer [Supplement section](https://github.com/EXPRESSCLUSTER/Hyper-V/edit/master/WindowsServer2016/README.md#supplement).
-1. Copy the all directories and files from the source to the destination.  
+		- If you cannot create it under the VM directory as shown above, refer to the [Supplement section](#supplement).
+1. Copy all of the directories and files from the source to the destination.  
 	```
 	Source     : X:\vm\ws2016-VM\Virtual Machines
 	Destination: X:\vm\ws2016-VM\bak
@@ -113,11 +113,11 @@ Please refer to [EXPRESSCLUSTER manual](https://www.nec.com/en/global/prod/expre
 1. Remove the following scripts:
 	- **B_SetEnvironment.bat**
 	- **B_start.ps1**
-1. Add the script resource to the failover group.
+1. Add the script resources to the failover group.
 	- Replace **start.bat** with the script you downloaded.
 	- Replace **stop.bat** with the script you downloaded.
 	- Add **SetEnvironment.bat**.
-		- After the addition of script, Edit the script.
+		- After the addition of this last script, Edit the script.
 			- As an example, if the VM path is *X:\vm\ws2016-VM\Virtual Machines\12345678-ABCD-1234-ABCD-123456789ABC*  
 				```
 				set VM=ws2016-VM
@@ -133,16 +133,16 @@ Please refer to [EXPRESSCLUSTER manual](https://www.nec.com/en/global/prod/expre
 1. Add Custom Monitor Resource
 	- Select **Active** as **Monitor Timing**, and select the script resource for VM as **Target Resource**. 
 	- Replace **genw.bat** with the script you downloaded.
-		- After the addition of script, Edit the script.  
+		- After the addition of this script, Edit the script.  
 		```
 		cd "C:\Program Files\EXPRESSCLUSTER\scripts\<failover group name>\<script resource name>"
 		```
 	- Select the script resource for VM as **Recovery Target**.
 
 ### Upload the Cluster Configuration and test the cluster
-1. Apply the configuration file on WebUI Configuration mode.
+1. Apply the configuration file in WebUI Configuration mode.
 1. Start the failover group on the primary server.
-1. After the failover group has started, confim that the virtual machine is running on PowerShell.
+1. After the failover group has started, confirm that the virtual machine is running in PowerShell.
     ```
     PS> Get-VM -VMName <virtual machine name>
 
@@ -157,10 +157,10 @@ Following features are not supported.
 - Hyper-V Live Migration/Quick Migration
 
 ## Supplement
-In the case that you cannot create backup directory under VM directory, replace the procedure of [Add the Script Resource to Control the Virtual Machine section](https://github.com/EXPRESSCLUSTER/Hyper-V/edit/master/WindowsServer2016/README.md#add-the-script-resource-to-control-the-virtual-machine) with [Add the Script Resource to Control the Virtual Machine for the case that you cannot create backup directory under VM directory](https://github.com/EXPRESSCLUSTER/Hyper-V/edit/master/WindowsServer2016/README.md#add-the-script-resource-to-control-the-virtual-machine-for-the-case-that-you-cannot-create-backup-directory-under-vm-directory).
+In the case that you cannot create a backup directory under the VM directory, replace the procedure of [Add the Script Resource to Control the Virtual Machine section](#add-the-script-resource-to-control-the-virtual-machine) with [Add the Script Resource to Control the Virtual Machine for the case that you cannot create backup directory under VM directory](#add-the-script-resource-to-control-the-virtual-machine-for-the-case-that-you-cannot-create-backup-directory-under-vm-directory).
 
 - **Note**
-	- Backup directory should be crated on Mirror Disk (in this sample X: drive).
+	- Backup directory should be created on the Mirror Disk (in this sample X: drive).
 
 ### Add the Script Resource to Control the Virtual Machine for the case that you cannot create backup directory under VM directory
 
@@ -172,12 +172,12 @@ In the case that you cannot create backup directory under VM directory, replace 
 1. Rename the following files:
 	- <Before>*B_SetEnvironment.bat* -> <After>*SetEnvironment.bat*
 	- <Before>*B_start.ps1* -> <After>*start.ps1*
-1. Add the script resource to the failover group.
+1. Add the script resources to the failover group.
 	- Replace **start.bat** with the script you downloaded.
 	- Replace **stop.bat** with the script you downloaded.
 	- Add **SetEnvironment.bat**.
-		- After the addition of script, Edit the script.
-			-As an example, if the VM path is *X:\vm\ws2016-VM\Virtual Machines\12345678-ABCD-1234-ABCD-123456789ABC* and backup directory is *X:\bax* as follows:  
+		- After the addition of the last script, Edit the script.
+			- As an example, if the VM path is *X:\vm\ws2016-VM\Virtual Machines\12345678-ABCD-1234-ABCD-123456789ABC* and backup directory is *X:\bak* as follows:  
 			```bat
 			X:
 			 |
@@ -208,7 +208,7 @@ In the case that you cannot create backup directory under VM directory, replace 
 1. Add Custom Monitor Resource
 	- Select **Active** as **Monitor Timing**, and select the script resource for VM as **Target Resource**. 
 	- Replace **genw.bat** with the script you downloaded.
-		- After the addition of script, Edit the script.
+		- After the addition of this script, Edit the script.
 		```
 		cd "C:\Program Files\EXPRESSCLUSTER\scripts\<failover group name>\<script resource name>"
 		```
