@@ -1,7 +1,7 @@
 # Hyper-V host clustering by EXPRESSCLUSTER
 
 This document describes a step-by-step procedure for setting up a HA cluster of Hyper-V hosts.  
-The method also enables replication of a **VM** (virtual machine) between **PM** (physical machine).  
+The method also enables replication of a **VM** (virtual machine) between **PM**s (physical machines).  
 The minimum requirement is two PMs only and no shared storage is required.
 
 ## System diagram
@@ -46,11 +46,11 @@ Assumption:
 On PM1
   1. Open Hyper-V Manager.
   2. Right click Hyper-V host PM1 > [New] > [Virtual Machine].
-  3. Enter e.g. [VM1] as [Name] > specify the location under MD resource [x:\\Hyper-V\\VM Configs] > [Next].
+  3. Enter e.g. [VM1] as [Name] > specify the location under MD resource [X:\\Hyper-V\\VM Configs] > [Next].
   4. Specify whichever generation > [Next].
   5. Assign Memory > [Next].
   6. Configure networking > [Next].
-  7. Select [Create a virtual hard disk]> specify [x:\\Hyper-V\\VM Configs] as [Location] > specify [Name] and [Size] as needed > [Next].
+  7. Select [Create a virtual hard disk]> specify [X:\\Hyper-V\\VM Configs] as [Location] > specify [Name] and [Size] as needed > [Next].
   8. Specify Installation Options as needed > [Next].
   9. Click [Finish].
   10. Open EC WebUI > move the failover group to PM2.
@@ -58,7 +58,7 @@ On PM1
 On PM2
   1. Open Hyper-V Manager.
   2. Right click Hyper-V host PM2 > [Import Virtual Machine].
-  3. Specify [x:\\Hyper-V\\VM Configs\\VM1] as [Folder] > [Next].
+  3. Specify [X:\\Hyper-V\\VM Configs\\VM1] as [Folder] > [Next].
   4. Select [**Register the virtual machine in-place (use the existing unique ID)**] > [Next].
   5. Click [Finish].
 
