@@ -484,7 +484,7 @@ Ensure:
 
 ---
 
-# 21. Create a Virtual Machine on the Mirror Disk of Server1 (Primary Server) using the Management Server through Hyper-V Manager (Point No. 18).
+### 21. Create a Virtual Machine on the Mirror Disk of Server1 (Primary Server) using the Management Server through Hyper-V Manager (Point No. 18).
 
 1. Launch **Hyper-V Manager** on the Management server.
 Open **Hyper-V Manager** > **Connect To Server** >
@@ -550,7 +550,8 @@ powershell -Command "Stop-VM -Name %VMNAME% -Force"
 
 ---
 
-# 27. **Add the Custom Monitor Resource** — add [Custom Monitor resource]
+# 27. **Add the Custom Monitor Resource** 
+— add in Monitor Resource > [Custom Monitor resource]
 
 edit [genw.bat]
 
