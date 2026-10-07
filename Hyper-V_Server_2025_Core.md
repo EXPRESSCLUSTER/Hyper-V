@@ -1,6 +1,6 @@
-# Windows Server 2025 Hyper-V Remote Management and EXPRESSCLUSTER High Availability Deployment Guide
+## Windows Server 2025 Hyper-V Remote Management and EXPRESSCLUSTER High Availability Deployment Guide
 
-# 1. Overview
+## 1. Overview
 
 This document provides a complete step-by-step implementation guide for:
 
@@ -16,7 +16,7 @@ This guide is designed for lab, PoC and production reference environments.
 
 ---
 
-# 2. Environment Details
+## 2. Environment Details
 
 | Component | Hostname | IP Address | Operating System |
 |------------|------------|------------|------------|
@@ -27,7 +27,7 @@ This guide is designed for lab, PoC and production reference environments.
 
 ---
 
-# 3. Architecture
+## 3. Architecture
 
 ```text
                                  Management Server
@@ -57,7 +57,7 @@ This guide is designed for lab, PoC and production reference environments.
 ```
 ---
 
-# 4. Prerequisites
+## 4. Prerequisites
 
 ## Hardware
 
@@ -75,7 +75,7 @@ This guide is designed for lab, PoC and production reference environments.
   
 ---
 
-## Software
+### Software
 
 - Windows Server 2025 Core
 - Hyper-V Role
@@ -84,7 +84,7 @@ This guide is designed for lab, PoC and production reference environments.
 
 ---
 
-# 5. Configure Windows Server Core
+## 5. Configure Windows Server Core
 
 Launch Server Configuration Tool:
 
@@ -116,7 +116,7 @@ Rename-Computer HYPERV2 -Restart
 
 ---
 
-# 6. Install Hyper-V Role
+## 6. Install Hyper-V Role
 
 Run on both nodes:
 
@@ -138,9 +138,9 @@ Expected:
 
 ---
 
-# 7. Configure Storage
+## 7. Configure Storage
 
-## Cluster Disk
+### Cluster Disk
 
 ```powershell
 diskpart
@@ -160,7 +160,7 @@ assign letter=F:
 
 ---
 
-## Mirror Disk
+### Mirror Disk
 
 ```powershell
 select disk 2
@@ -178,7 +178,7 @@ assign letter=E:
 
 ---
 
-# 8. Create Hyper-V Virtual Switch
+## 8. Create Hyper-V Virtual Switch
 
 List Adapters:
 
@@ -206,7 +206,7 @@ ExternalSwitch External   Intel(R) 82574L Gigabit Network Connection
 InternalSwitch Internal
 ```
 
-# 9. Create Virtual Machine
+## 9. Create Virtual Machine
 
 Create Folder:
 
@@ -230,7 +230,7 @@ Get-VM
 
 ---
 
-# 10. Mount ISO
+## 10. Mount ISO
 
 Create ISO Folder:
 
@@ -255,7 +255,7 @@ Get-Item C:\ISO\win2k25.iso
 
 ---
 
-# 11. Attach ISO to VM
+## 11. Attach ISO to VM
 
 ```powershell
 Add-VMDvdDrive `
@@ -271,7 +271,7 @@ Get-VMDvdDrive -VMName TestVM
 
 ---
 
-# 12. Configure Boot Order
+## 12. Configure Boot Order
 
 ```powershell
 $dvd = Get-VMDvdDrive -VMName TestVM
@@ -289,7 +289,7 @@ Verify:
 
 ---
 
-# 13. Start VM
+## 13. Start VM
 
 ```powershell
 Start-VM TestVM
@@ -309,7 +309,7 @@ Running
 
 ---
 
-# 14. Configure WinRM
+## 14. Configure WinRM
 
 Run on Both Hyper-V Hosts:
 
@@ -331,7 +331,7 @@ Running
 
 ---
 
-# 15. Configure Trusted Hosts
+## 15. Configure Trusted Hosts
 
 Run on Management Server (e.g. 192.168.1.5):
 
@@ -350,9 +350,9 @@ Get-Item WSMan:\localhost\Client\TrustedHosts
 
 ---
 
-# 16. Test Connectivity
+## 16. Test Connectivity
 
-## Ping Test
+### Ping Test
 
 ```powershell
 ping 192.168.1.1
@@ -362,7 +362,7 @@ ping 192.168.1.2
 
 ---
 
-## DNS Validation
+### DNS Validation
 
 ```powershell
 Resolve-DnsName HYPERV1
@@ -372,7 +372,7 @@ Resolve-DnsName HYPERV2
 
 ---
 
-## WinRM Validation
+### WinRM Validation
 
 ```powershell
 Test-WSMan HYPERV1
@@ -386,9 +386,9 @@ Test-WSMan 192.168.1.2
 
 ---
 
-# 17. PowerShell Remoting
+## 17. PowerShell Remoting
 
-## HYPERV1
+### HYPERV1
 
 ```powershell
 $Password = Read-Host "Enter Password" -AsSecureString
@@ -422,7 +422,7 @@ Exit-PSSession
 
 ---
 
-# 18. Hyper-V Manager Connection
+## 18. Hyper-V Manager Connection
 
 From Management Server:
 
@@ -445,7 +445,7 @@ Verify all VMs are visible.
 
 ---
 
-# 19. VMConnect
+## 19. VMConnect
 
 Open VM Console:
 
@@ -467,7 +467,7 @@ vmconnect.exe 192.168.1.1 TestVM
 
 ---
 
-# 20. EXPRESSCLUSTER Installation
+## 20. EXPRESSCLUSTER Installation
 
 ### Install EXPRESSCLUSTER on Both Servers (Primary and Secondary)
 Please refer to the [EXPRESSCLUSTER manual](https://www.nec.com/en/global/prod/expresscluster/en/doc/manuals/W60_IG_EN_03.pdf).
@@ -503,8 +503,9 @@ Open **Hyper-V Manager** > **Connect To Server** >
 1. Check the parameters and click **Finish**.
 1. Open EC WebUI > move the failover group to Server2 (Secondary Server).
 
-### On Server2 (Secondary Server)
-1. Launch **Hyper-V Manager** on the Secondary server.
+### Launch **Hyper-V Manager** on the Management server (Secondary Server)
+Open **Hyper-V Manager** > **Connect To Server** >
+**Select Another Computer** > Enter **hyperv2** server > OK.
 1. Right click Hyper-V host Server2 > [Import Virtual Machine].
 1. Specify **X:\VM\Testvm** as [Folder] > **Next**.
 1. Select **Register the virtual machine in-place (use the existing unique ID)** > and click **Next**
@@ -516,7 +517,7 @@ Open **Hyper-V Manager** > **Connect To Server** >
 
   **NOTE** : The following assumes the name of the VM as *TestVm*
 
-# 25. **Add the Script Resource to Control the Virtual Machine**
+## 25. **Add the Script Resource to Control the Virtual Machine**
  — add [Script resource] to the failover group >  
 
 edit [start.bat]
@@ -536,7 +537,7 @@ powershell -Command "Start-VM -Name %VMNAME% -Confirm:$false"
 
 ---
 
-# 26. Create Stop Script
+## 26. Create Stop Script
 
 edit [stop.bat]
 
@@ -550,7 +551,7 @@ powershell -Command "Stop-VM -Name %VMNAME% -Force"
 
 ---
 
-# 27. **Add the Custom Monitor Resource** 
+## 27. **Add the Custom Monitor Resource** 
 — add in Monitor Resource > [Custom Monitor resource]
 
 edit [genw.bat]
@@ -570,7 +571,7 @@ exit %ERRORLEVEL%
 ```
 Apply the configuration in ECX WebUI.
 ---
-# 29. Start Cluster
+## 29. Start Cluster
 
 Start Cluster Service:
 
@@ -583,13 +584,13 @@ Confirm:
 ```text
 Cluster Status : Running
 ```
-## Restriction
+### Restriction
 
 VMs stored in the same MD resource need to move/failover together. It's good to control such VMs in the same failover group.
 
 ---
 
-# 30. Failover Validation and Testing Scenarios
+## 30. Failover Validation and Testing Scenarios
 
 |No.| Test item                       | Confirmation |
 |---|---                              |---           |
@@ -598,7 +599,7 @@ VMs stored in the same MD resource need to move/failover together. It's good to 
 | 3 | power off Server2                   | Server1 noticed heartbeat timeout, then started VM1 |
 
 
-# 31. Validation Checklist
+## 31. Validation Checklist
 
 - [ ] Hyper-V Installed
 - [ ] External Switch Created
@@ -618,9 +619,9 @@ VMs stored in the same MD resource need to move/failover together. It's good to 
 
 ---
 
-# 32. Troubleshooting
+## 32. Troubleshooting
 
-## WinRM Error
+### WinRM Error
 
 ```text
 The WinRM client cannot process the request.
@@ -636,7 +637,7 @@ winrm quickconfig
 
 ---
 
-## Hyper-V Service
+### Hyper-V Service
 
 ```powershell
 Get-Service vmms
@@ -650,7 +651,7 @@ Start-Service vmms
 
 ---
 
-## Firewall
+### Firewall
 
 ```powershell
 Get-NetFirewallRule `
@@ -659,7 +660,7 @@ Get-NetFirewallRule `
 
 ---
 
-## Cluster Communication
+### Cluster Communication
 
 Verify:
 
@@ -671,7 +672,7 @@ Mirror Status = Synchronized
 
 ---
 
-# 33. Final Deployment Status
+## 33. Final Deployment Status
 
 | Component | Status |
 |------------|------------|
