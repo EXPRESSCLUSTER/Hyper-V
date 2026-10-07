@@ -65,15 +65,14 @@ This guide is designed for lab, PoC and production reference environments.
 
 - Minimum 2 CPUs
 - Minimum 8 GB RAM
-- Additional storage for VM workloads
-- Two network adapters recommended
+- Mirror Disks (As per the requirement with same byte level size)
+- Cluster Disk (Minimum 1 GB)
 
 ### Management Server
 
 - Windows Server 2025
 - Hyper-V Manager
-- VMConnect
-
+  
 ---
 
 ## Software
