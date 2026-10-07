@@ -30,9 +30,9 @@ This guide is designed for lab, PoC and production reference environments.
 ## 3. Architecture
 
 ```text
-                                 Management Server
+                              Management Server
                           Windows Server 2025 (192.168.1.5)
-                                  Hyper-V Manager
+                                Hyper-V Manager
                                      |
                                      |
                        Hyper-V Manager / VMConnect
@@ -445,7 +445,7 @@ Verify all VMs are visible.
 
 ---
 
-## 19. VMConnect
+## 19. VM Connect
 
 Open VM Console:
 
