@@ -1,4 +1,4 @@
-## ExpressCluster: Hyper-V Host Clustering Solution on Windows Server 2022 Core Deployment Guide
+## ExpressCluster: Hyper-V Host Clustering Solution on Windows Server 2025 Core Deployment Guide
 
 ## 1. Overview
 
